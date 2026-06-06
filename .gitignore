@@ -3,6 +3,8 @@ data/raw/
 data/index/
 *.sqlite
 *.db
+readme_2026.pdf
+readme_2026_extracted.txt
 
 # Local environment
 .env

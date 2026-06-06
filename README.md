@@ -61,3 +61,13 @@ Do not commit:
 - secrets or credentials.
 
 Use `data/raw/` and `data/index/` locally; both are ignored by git.
+
+## PDF Readme Extraction
+
+For source readmes that are only available as PDFs:
+
+```bash
+node scripts/extract-pdf-text.mjs readme_2026.pdf readme_2026_extracted.txt
+```
+
+The extracted text is only a helper for schema review. Do not commit downloaded PDFs or extracted text dumps.

@@ -27,22 +27,34 @@ Build a pipeline that supports:
 - official source links;
 - analytics over result distribution.
 
-## Expected Dataset Shape
+## Dataset Shape
 
-The actual dataset schema must be confirmed from `readme_2026.pdf` before ingestion.
+The initial schema mapping is now captured in `docs/edrsr-schema-mapping.md`.
 
-Based on public readme snippets for EDRSR yearly archives, expected fields may include:
+The archive appears to contain:
 
-- decision identifier;
-- case number;
-- court name;
-- judge;
-- decision date;
-- receipt/registration date;
-- decision form/type;
-- legal proceeding/category metadata;
-- link to text or public page;
-- dictionaries for code values.
+- `documents.csv` as the main decision metadata file;
+- `cause_categories.csv`;
+- `courts.csv`;
+- `instances.csv`;
+- `judgment_forms.csv`;
+- `justice_kinds.csv`;
+- `regions.csv`.
+
+Key `documents.csv` fields identified from the readme:
+
+- `doc_id`;
+- `court_code`;
+- `justice_kind`;
+- `judgment_code`;
+- `category_code`;
+- `cause_num`;
+- `adjudication_date`;
+- `receipt_date`;
+- `judge`;
+- `doc_url`;
+- `status`;
+- `date_publ`.
 
 ## Normalized Decision Record
 

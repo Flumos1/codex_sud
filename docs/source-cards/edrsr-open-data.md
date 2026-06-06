@@ -12,6 +12,11 @@ Status: `researching` for ingestion, likely primary source for precedent search 
 
 Last reviewed: 2026-06-06
 
+Related technical mapping:
+
+- `docs/edrsr-schema-mapping.md`
+- `docs/edrsr-ingestion-plan.md`
+
 ## Why This Source Matters
 
 This is the source for the real precedent-search feature:
@@ -129,14 +134,15 @@ Search facets:
 ## Technical Approach
 
 1. Confirm lawful dataset source and download method.
-2. Parse a small sample first.
-3. Normalize metadata.
-4. Extract text.
-5. Build keyword search.
-6. Add article extraction.
-7. Add outcome classification.
-8. Add semantic search.
-9. Add legal memo generation only after retrieval quality is acceptable.
+2. Confirm schema from `readme_2026.pdf`.
+3. Parse a small sample first.
+4. Normalize metadata from `documents.csv` and dictionaries.
+5. Confirm how full text is obtained: directly from archive or through `doc_url`.
+6. Build keyword search.
+7. Add article extraction.
+8. Add outcome classification.
+9. Add semantic search.
+10. Add legal memo generation only after retrieval quality is acceptable.
 
 Recommended search approach:
 
