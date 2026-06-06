@@ -143,6 +143,8 @@ For a safe real sample:
 6. Normalize to JSONL.
 7. Do not commit raw rows until privacy and licensing are confirmed.
 
+Real inspection on 2026-06-06 confirmed that `documents.csv` stores metadata and `doc_url` values pointing to official `.rtf` files, not full text inside the CSV. Text ingestion therefore needs a second stage that downloads/caches RTF files and extracts plain text before article extraction and outcome classification.
+
 Local normalization command:
 
 ```bash

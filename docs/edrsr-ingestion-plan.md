@@ -214,6 +214,12 @@ node scripts/search-sample.mjs --input data/index/edrsr-2026.sample.jsonl --arti
 
 The repository also contains a synthetic CSV fixture in `data/sample/edrsr-csv-fixture/` that follows the real open-data schema but does not contain real court decisions.
 
+Enrich normalized metadata with decision text from official RTF URLs:
+
+```bash
+node scripts/enrich-edrsr-text.mjs --input data/index/edrsr-2026.sample.jsonl --output data/index/edrsr-2026.sample.text.jsonl --limit 10 --cache data/raw/edrsr-rtf-cache
+```
+
 ## Do Not Commit
 
 - downloaded full archives;

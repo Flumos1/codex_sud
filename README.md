@@ -91,3 +91,11 @@ Test the parser on the committed synthetic schema fixture:
 ```bash
 node scripts/normalize-edrsr.mjs --input data/sample/edrsr-csv-fixture --output data/index/edrsr-fixture.jsonl --dataset synthetic-edrsr-csv-fixture
 ```
+
+Enrich normalized metadata with text from official RTF URLs:
+
+```bash
+node scripts/enrich-edrsr-text.mjs --input data/index/edrsr-2026.sample.jsonl --output data/index/edrsr-2026.sample.text.jsonl --limit 10 --cache data/raw/edrsr-rtf-cache
+```
+
+The RTF cache is raw source data and must stay outside git.
