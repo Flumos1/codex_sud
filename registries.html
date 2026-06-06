@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Государственные реестры | Legal OS Ukraine</title>
+    <meta name="description" content="Каталог официальных реестров и будущих юридических проверок.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Legal OS Ukraine">
+        <span class="brand-mark">L</span>
+        <span>Legal OS Ukraine</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="case-status.html">Стан справи</a>
+        <a href="registries.html" aria-current="page">Реестры</a>
+        <a href="LEGAL_PLATFORM_ROADMAP.md">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <p class="eyebrow">Registry Intelligence</p>
+        <h1>Государственные реестры и проверки</h1>
+        <p class="lead">
+          Начинаем с безопасного каталога официальных источников. Автоматизацию добавляем только там,
+          где это разрешено условиями источника, API или режимом открытых данных.
+        </p>
+      </section>
+
+      <section class="section">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Источник</th>
+                <th>Что проверяет</th>
+                <th>Первый режим</th>
+                <th>Статус</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="https://court.gov.ua/fair/" target="_blank" rel="noreferrer">Стан розгляду справ</a></td>
+                <td>Статус и стадии рассмотрения судебных дел</td>
+                <td>Ручной официальный поиск</td>
+                <td><span class="badge caution">manual-link-only</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://reyestr.court.gov.ua/" target="_blank" rel="noreferrer">ЄДРСР</a></td>
+                <td>Судебные решения</td>
+                <td>Открытые данные и ссылки на оригинал</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td>ЄДР юрлиц и ФОП</td>
+                <td>Компания, ФОП, регистрационные данные</td>
+                <td>Официальный источник/API после проверки</td>
+                <td><span class="badge">candidate</span></td>
+              </tr>
+              <tr>
+                <td>Єдиний реєстр боржників</td>
+                <td>Долги и исполнительные риски</td>
+                <td>Требует правовой проверки</td>
+                <td><span class="badge risk">needs review</span></td>
+              </tr>
+              <tr>
+                <td>ProZorro</td>
+                <td>Публичные закупки и участие компаний</td>
+                <td>Открытые данные после проверки источника</td>
+                <td><span class="badge">candidate</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div>
+          <p class="eyebrow">Следующий шаг</p>
+          <h2>Юридическая проверка за 60 секунд</h2>
+          <p>
+            Первый отчет будет собирать только безопасные сигналы: официальный источник, дата проверки,
+            найденные совпадения, ссылки и пометки о ручной верификации.
+          </p>
+        </div>
+        <form class="panel form-panel" aria-label="Запрос на проверку">
+          <label>
+            Что нужно проверить?
+            <input type="text" placeholder="Например: компания, должник, номер дела">
+          </label>
+          <label>
+            Контакт для раннего доступа
+            <input type="email" placeholder="email@example.com">
+          </label>
+          <button class="button primary" type="button">Сохранить интерес</button>
+        </form>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Legal OS Ukraine</span>
+      <span>Используем официальные источники и законный доступ.</span>
+    </footer>
+  </body>
+</html>

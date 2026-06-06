@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Проверить состояние судебного дела | Legal OS Ukraine</title>
+    <meta name="description" content="Безопасный пользовательский сценарий проверки статуса судебного дела через court.gov.ua/fair.">
+    <link rel="stylesheet" href="assets/styles.css">
+    <script src="assets/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Legal OS Ukraine">
+        <span class="brand-mark">L</span>
+        <span>Legal OS Ukraine</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="case-status.html" aria-current="page">Стан справи</a>
+        <a href="registries.html">Реестры</a>
+        <a href="LEGAL_PLATFORM_ROADMAP.md">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <p class="eyebrow">Первый источник: court.gov.ua/fair</p>
+        <h1>Проверить состояние судебного дела</h1>
+        <p class="lead">
+          Мы не обходим reCAPTCHA и не парсим защищенный поиск. Пользователь проверяет дело
+          на официальном сайте, а здесь сохраняет карточку, заметки и дату следующей проверки.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="https://court.gov.ua/fair/" target="_blank" rel="noreferrer">
+            Открыть официальный поиск
+          </a>
+          <a class="button" href="docs/source-cards/court-gov-fair.md">Source card</a>
+        </div>
+      </section>
+
+      <section class="section grid two">
+        <article class="panel">
+          <p class="eyebrow">Что подготовить</p>
+          <h2>Поля для официального поиска</h2>
+          <ul class="check-list">
+            <li>Номер дела</li>
+            <li>Номер производства</li>
+            <li>Суд или регион</li>
+            <li>Сторона по делу</li>
+            <li>Дата поступления, если известна</li>
+          </ul>
+          <p class="note">
+            Поиск выполняется на официальном сайте судебной власти Украины. Там может потребоваться reCAPTCHA.
+          </p>
+        </article>
+
+        <article class="panel">
+          <p class="eyebrow">Что сохраняем у себя</p>
+          <h2>Минимальная карточка дела</h2>
+          <ul class="check-list">
+            <li>Номер дела и суд</li>
+            <li>Клиент или внутренняя метка</li>
+            <li>Дата последней ручной проверки</li>
+            <li>Следующее напоминание</li>
+            <li>Заметки юриста или пользователя</li>
+          </ul>
+        </article>
+      </section>
+
+      <section class="section split align-start">
+        <form class="panel form-panel" id="caseForm">
+          <p class="eyebrow">Карточка дела</p>
+          <h2>Сохранить ручную проверку</h2>
+          <label>
+            Номер дела
+            <input name="caseNumber" required type="text" placeholder="Например: 205/16257/24">
+          </label>
+          <label>
+            Суд
+            <input name="courtName" type="text" placeholder="Название суда">
+          </label>
+          <label>
+            Клиент или метка
+            <input name="clientName" type="text" placeholder="Например: Иваненко / долг / апелляция">
+          </label>
+          <label>
+            Дата последней проверки
+            <input name="checkedAt" type="date">
+          </label>
+          <label>
+            Следующая проверка
+            <input name="remindAt" type="date">
+          </label>
+          <label>
+            Заметки
+            <textarea name="notes" rows="4" placeholder="Что увидели на официальном сайте, какие следующие действия"></textarea>
+          </label>
+          <button class="button primary" type="submit">Сохранить карточку</button>
+          <p class="note">Данные сохраняются только в локальном браузере этого устройства.</p>
+        </form>
+
+        <section class="panel saved-panel" aria-labelledby="savedTitle">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Локальный прототип</p>
+              <h2 id="savedTitle">Сохраненные карточки</h2>
+            </div>
+            <button class="button small" type="button" id="clearCases">Очистить</button>
+          </div>
+          <div id="caseList" class="case-list" aria-live="polite"></div>
+        </section>
+      </section>
+
+      <section class="section">
+        <div class="disclaimer">
+          <strong>Важно.</strong>
+          Этот прототип не является официальным сервисом судебной власти и не предоставляет юридическую консультацию.
+          Все статусы дела нужно проверять на официальном сайте
+          <a href="https://court.gov.ua/fair/" target="_blank" rel="noreferrer">court.gov.ua/fair</a>.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Legal OS Ukraine</span>
+      <span>Первый user-driven flow для проверки статуса дела.</span>
+    </footer>
+  </body>
+</html>
