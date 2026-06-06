@@ -26,7 +26,7 @@ Status values:
 | Єдиний реєстр боржників | TBD | Ministry of Justice / official holder | Debtors | TBD | TBD | High | TBD | TBD | needs-legal-review | Debt and enforcement risk |
 | Автоматизована система виконавчого провадження | TBD | Ministry of Justice / official holder | Enforcement proceedings | TBD | TBD | High | TBD | TBD | needs-legal-review | Enforcement status |
 | Єдиний державний реєстр судових рішень | https://reyestr.court.gov.ua/ | Judiciary / DSA-related source | Court decisions | Open pages / open data to verify | TBD | Medium | TBD | TBD | researching | Legal research, case-law search |
-| Стан розгляду справ | https://court.gov.ua/fair/ | Judiciary | Case status | Captcha-protected web search | No direct automation for search | High | Limited | Avoid automated storage until reviewed | manual-link-only | User-driven case status check |
+| Стан розгляду справ | https://court.gov.ua/fair/ | Judiciary | Case status | Captcha-protected web search; supporting court-directory endpoints found | No direct automation for main search | High | Limited / needs terms review | Store only user-entered metadata in first version | manual-link-only | User-driven case status check; manual case card; reminders |
 | ProZorro | TBD | Public procurement ecosystem | Procurement | TBD | TBD | Low/Medium | TBD | TBD | candidate | Procurement participation and risk |
 | Sanctions lists | TBD | Official sanctions source | Sanctions | TBD | TBD | Medium | TBD | TBD | candidate | Sanction screening |
 | Bankruptcy / insolvency data | TBD | Official source | Insolvency | TBD | TBD | Medium/High | TBD | TBD | candidate | Counterparty risk |

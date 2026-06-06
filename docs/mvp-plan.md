@@ -45,9 +45,11 @@ Deliverables:
 - mark each source by access mode and risk;
 - publish a user-friendly catalog page;
 - choose 3-5 safe first checks.
+- create the first detailed source card for `court.gov.ua/fair/`.
 
 First likely checks:
 
+- court case status via `court.gov.ua/fair/` as a manual user-driven flow;
 - company/FOP;
 - court decisions and case links;
 - debt/enforcement;
