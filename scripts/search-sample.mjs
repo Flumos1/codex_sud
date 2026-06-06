@@ -6,7 +6,10 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const samplePath = path.join(root, "data", "sample", "edrsr-sample.jsonl");
 
 const args = parseArgs(process.argv.slice(2));
-const decisions = await loadJsonl(samplePath);
+const inputPath = args.input ? path.resolve(args.input) : samplePath;
+delete args.input;
+
+const decisions = await loadJsonl(inputPath);
 const results = search(decisions, args);
 const summary = summarize(results);
 

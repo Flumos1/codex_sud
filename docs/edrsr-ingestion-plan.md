@@ -200,6 +200,20 @@ node scripts/search-sample.mjs --article "625 ЦК" --region "Київ" --outcom
 
 This uses synthetic sample data in `data/sample/edrsr-sample.jsonl`.
 
+Normalize a small extracted EDRSR directory:
+
+```bash
+node scripts/normalize-edrsr.mjs --input data/raw/edrsr_2026 --output data/index/edrsr-2026.sample.jsonl --limit 100 --dataset edrsr_data_2026
+```
+
+Then search the normalized JSONL:
+
+```bash
+node scripts/search-sample.mjs --input data/index/edrsr-2026.sample.jsonl --article "625 ЦК"
+```
+
+The repository also contains a synthetic CSV fixture in `data/sample/edrsr-csv-fixture/` that follows the real open-data schema but does not contain real court decisions.
+
 ## Do Not Commit
 
 - downloaded full archives;
@@ -214,5 +228,5 @@ This uses synthetic sample data in `data/sample/edrsr-sample.jsonl`.
 2. Add `.gitignore` for raw data and indexes.
 3. Create real schema mapping from readme.
 4. Download a small sample outside git.
-5. Convert sample to normalized JSONL.
+5. Convert sample to normalized JSONL with `scripts/normalize-edrsr.mjs`.
 6. Compare synthetic prototype with real sample.

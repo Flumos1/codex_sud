@@ -36,6 +36,12 @@ JSON output:
 node scripts/search-sample.mjs --article "130 КУпАП" --outcome remanded --json
 ```
 
+Search a normalized local JSONL file:
+
+```bash
+node scripts/search-sample.mjs --input data/index/edrsr-2026.sample.jsonl --article "625 ЦК"
+```
+
 Supported filters:
 
 - `--article`
@@ -71,3 +77,17 @@ node scripts/extract-pdf-text.mjs readme_2026.pdf readme_2026_extracted.txt
 ```
 
 The extracted text is only a helper for schema review. Do not commit downloaded PDFs or extracted text dumps.
+
+## EDRSR CSV Normalization
+
+After downloading and extracting `edrsr_data_2026.zip` outside git, normalize a small local slice:
+
+```bash
+node scripts/normalize-edrsr.mjs --input data/raw/edrsr_2026 --output data/index/edrsr-2026.sample.jsonl --limit 100 --dataset edrsr_data_2026
+```
+
+Test the parser on the committed synthetic schema fixture:
+
+```bash
+node scripts/normalize-edrsr.mjs --input data/sample/edrsr-csv-fixture --output data/index/edrsr-fixture.jsonl --dataset synthetic-edrsr-csv-fixture
+```

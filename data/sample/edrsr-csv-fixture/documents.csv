@@ -1,0 +1,3 @@
+doc_id,court_code,justice_kind,judgment_code,category_code,cause_num,adjudication_date,receipt_date,judge,doc_url,status,date_publ,text
+fixture-001,101,1,10,500,910/1001/26,2026-02-12,2026-02-13,"Петренко І. І.",https://reyestr.court.gov.ua/Review/fixture-001,1,2026-02-14,"Позивач просив стягнути борг за ст. 625 ЦК України. Позов задовольнити частково."
+fixture-002,102,4,20,700,522/2002/26,2026-03-05,2026-03-06,"Іваненко О. О.",https://reyestr.court.gov.ua/Review/fixture-002,1,2026-03-07,"Особа притягувалась за ст. 130 КУпАП. Провадження у справі закрити за відсутністю складу правопорушення."

@@ -143,6 +143,12 @@ For a safe real sample:
 6. Normalize to JSONL.
 7. Do not commit raw rows until privacy and licensing are confirmed.
 
+Local normalization command:
+
+```bash
+node scripts/normalize-edrsr.mjs --input data/raw/edrsr_2026 --output data/index/edrsr-2026.sample.jsonl --limit 100 --dataset edrsr_data_2026
+```
+
 ## Mapping To Search UI
 
 | UI Filter | Source / Derived Field |

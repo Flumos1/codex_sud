@@ -33,6 +33,8 @@ This is the source for the real precedent-search feature:
 
 Official open-data pages for EDRSR yearly datasets describe the dataset as containing court decisions received by EDRSR during the year.
 
+The 2026 dataset page states that the current-year dataset is updated once per day. On 2026-06-06, the data.gov.ua resource page showed `edrsr_data_2026.zip` as a ZIP resource last updated on 2026-06-06.
+
 The 2026 dataset pages state that open data may be copied, published, distributed, used commercially, combined with other information, or included in a product, with mandatory source attribution. This must still be checked per dataset and preserved in the product.
 
 ## Product Use Cases
