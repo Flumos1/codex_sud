@@ -69,7 +69,11 @@ Deliverables:
 - confirm lawful court-decision data source;
 - ingest a small sample;
 - build keyword search;
+- build article/legal-norm search;
+- add region, court, date, decision type, and outcome filters;
 - build decision card;
+- add outcome/result labels with confidence and manual verification;
+- add practice analytics summary;
 - show official source link;
 - save selected decisions.
 
@@ -78,6 +82,7 @@ Success signals:
 - a lawyer finds useful decisions faster than manual search;
 - result relevance is acceptable;
 - source links are trusted.
+- a lawyer can compare positive and negative practice by criteria.
 
 ## Phase 4: AI Summary And Legal Memo Prototype
 

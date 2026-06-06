@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Поиск судебной практики | Legal OS Ukraine</title>
+    <meta name="description" content="Прототип поиска судебной практики по статье, региону, суду, дате и результату.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Legal OS Ukraine">
+        <span class="brand-mark">L</span>
+        <span>Legal OS Ukraine</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="precedent-search.html" aria-current="page">Практика</a>
+        <a href="case-status.html">Стан справи</a>
+        <a href="registries.html">Реестры</a>
+        <a href="LEGAL_PLATFORM_ROADMAP.md">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <p class="eyebrow">Precedent Search</p>
+        <h1>Найти массив похожих судебных решений</h1>
+        <p class="lead">
+          Эта фича будет искать не одно дело, а всю релевантную практику по статье, региону,
+          суду, периоду, типу решения и результату. Основа — корпус судебных решений ЄДРСР,
+          а не защищенный поиск `court.gov.ua/fair/`.
+        </p>
+      </section>
+
+      <section class="section split align-start">
+        <form class="panel form-panel" aria-label="Фильтры поиска практики">
+          <p class="eyebrow">Критерии</p>
+          <h2>Поиск по статье и контексту</h2>
+          <label>
+            Статья или норма
+            <input type="text" placeholder="Например: ст. 130 КУпАП, ст. 625 ЦК">
+          </label>
+          <label>
+            Контекст / ключевые слова
+            <textarea rows="4" placeholder="Опишите ситуацию или аргумент: долг, моральный вред, отмена постановления..."></textarea>
+          </label>
+          <div class="form-grid">
+            <label>
+              Регион
+              <select>
+                <option>Вся Украина</option>
+                <option>м. Київ</option>
+                <option>Одеська область</option>
+                <option>Дніпропетровська область</option>
+                <option>Львівська область</option>
+              </select>
+            </label>
+            <label>
+              Инстанция
+              <select>
+                <option>Все инстанции</option>
+                <option>Первая инстанция</option>
+                <option>Апелляция</option>
+                <option>Кассация</option>
+              </select>
+            </label>
+          </div>
+          <div class="form-grid">
+            <label>
+              С даты
+              <input type="date">
+            </label>
+            <label>
+              По дату
+              <input type="date">
+            </label>
+          </div>
+          <div class="form-grid">
+            <label>
+              Тип решения
+              <select>
+                <option>Любой</option>
+                <option>Рішення</option>
+                <option>Постанова</option>
+                <option>Ухвала</option>
+                <option>Вирок</option>
+              </select>
+            </label>
+            <label>
+              Результат
+              <select>
+                <option>Любой</option>
+                <option>В пользу заявителя / истца</option>
+                <option>Отказано</option>
+                <option>Частично удовлетворено</option>
+                <option>Отменено</option>
+                <option>Направлено на новое рассмотрение</option>
+              </select>
+            </label>
+          </div>
+          <button class="button primary" type="button">Показать практику</button>
+          <p class="note">Сейчас это интерфейсный прототип. Данные подключаются на следующем этапе через открытые datasets ЄДРСР.</p>
+        </form>
+
+        <section class="panel saved-panel" aria-labelledby="practiceSummary">
+          <p class="eyebrow">Будущий результат</p>
+          <h2 id="practiceSummary">Сводка по практике</h2>
+          <div class="metric-grid">
+            <div>
+              <strong>1 248</strong>
+              <span>найденных решений</span>
+            </div>
+            <div>
+              <strong>37%</strong>
+              <span>позитивная практика</span>
+            </div>
+            <div>
+              <strong>18%</strong>
+              <span>отмена / новое рассмотрение</span>
+            </div>
+          </div>
+          <div class="rule-list compact">
+            <div>Сильные решения для цитирования</div>
+            <div>Противоположная практика</div>
+            <div>Аргументы, которые суды принимают</div>
+            <div>Регионы с отличающейся практикой</div>
+          </div>
+        </section>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Как это будет работать</p>
+          <h2>От поиска к стратегии</h2>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>1. Найти массив дел</h3>
+            <p>Система ищет решения по статье, словам, смыслу, региону, суду, дате и типу решения.</p>
+          </article>
+          <article class="card">
+            <h3>2. Классифицировать результат</h3>
+            <p>Каждое решение получает проверяемую метку: удовлетворено, отказано, отменено, изменено, новое рассмотрение.</p>
+          </article>
+          <article class="card">
+            <h3>3. Собрать позицию</h3>
+            <p>Юрист получает сильные цитаты, риски, противоположную практику и структуру будущего аргумента.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="disclaimer">
+          <strong>Важно.</strong>
+          Аналитика практики не является гарантией результата дела. Каждый вывод должен проверяться по официальному тексту решения.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Legal OS Ukraine</span>
+      <span>Прецедентный поиск строится на открытых данных судебных решений.</span>
+    </footer>
+  </body>
+</html>

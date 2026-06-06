@@ -249,11 +249,35 @@ h3 {
   gap: 10px;
 }
 
+.rule-list.compact {
+  margin-top: 18px;
+}
+
 .rule-list div {
   background: var(--surface-2);
   border-left: 4px solid var(--accent);
   font-weight: 700;
   padding: 14px 16px;
+}
+
+.feature-link {
+  color: var(--text);
+  display: grid;
+  gap: 10px;
+}
+
+.feature-link:hover {
+  border-color: var(--accent);
+  text-decoration: none;
+}
+
+.feature-link span {
+  color: var(--muted);
+}
+
+.feature-link strong {
+  font-size: 22px;
+  line-height: 1.2;
 }
 
 .table-wrap {
@@ -311,6 +335,12 @@ th {
   gap: 14px;
 }
 
+.form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 label {
   color: var(--text);
   display: grid;
@@ -319,7 +349,9 @@ label {
 }
 
 input,
-textarea {
+textarea,
+select {
+  background: #fff;
   border: 1px solid var(--line);
   color: var(--text);
   font: inherit;
@@ -333,7 +365,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
   border-color: var(--accent);
   outline: 2px solid rgba(29, 111, 143, 0.16);
 }
@@ -368,6 +401,28 @@ textarea:focus {
 .case-list {
   display: grid;
   gap: 12px;
+}
+
+.metric-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
+.metric-grid div {
+  background: var(--surface-2);
+  padding: 14px;
+}
+
+.metric-grid strong {
+  display: block;
+  font-size: 26px;
+}
+
+.metric-grid span {
+  color: var(--muted);
+  font-size: 14px;
 }
 
 .case-item {
@@ -415,6 +470,8 @@ textarea:focus {
   .site-header,
   .hero,
   .split,
+  .form-grid,
+  .metric-grid,
   .grid.two,
   .grid.three {
     grid-template-columns: 1fr;
