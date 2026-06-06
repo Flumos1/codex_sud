@@ -1,0 +1,14 @@
+# Local raw legal datasets and generated indexes
+data/raw/
+data/index/
+*.sqlite
+*.db
+
+# Local environment
+.env
+.env.*
+
+# Dependencies and build outputs
+node_modules/
+dist/
+build/
