@@ -145,6 +145,9 @@ Start rule-based:
 - "позов задовольнити" -> `satisfied`;
 - "у задоволенні позову відмовити" -> `dismissed`;
 - "задовольнити частково" -> `partially_satisfied`;
+- "апеляційну скаргу залишити без задоволення" -> `appeal_dismissed`;
+- "касаційну скаргу залишити без задоволення" -> `cassation_dismissed`;
+- "рішення залишити без змін" -> `left_unchanged`;
 - "скасувати" -> `cancelled`;
 - "змінити" -> `changed`;
 - "направити на новий розгляд" -> `remanded`;
@@ -218,6 +221,12 @@ Enrich normalized metadata with decision text from official RTF URLs:
 
 ```bash
 node scripts/enrich-edrsr-text.mjs --input data/index/edrsr-2026.sample.jsonl --output data/index/edrsr-2026.sample.text.jsonl --limit 10 --cache data/raw/edrsr-rtf-cache
+```
+
+Analyze the resulting local index:
+
+```bash
+node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl
 ```
 
 ## Do Not Commit

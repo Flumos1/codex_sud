@@ -18,6 +18,7 @@ Static pages:
 - `docs/mvp-plan.md` - small-start MVP plan.
 - `docs/precedent-search-design.md` - legal-practice search design.
 - `docs/edrsr-ingestion-plan.md` - ingestion/search pipeline plan.
+- `docs/edrsr-real-smoke-test.md` - first real-data EDRSR smoke-test notes.
 - `docs/registry-matrix.md` - registry source matrix.
 
 ## Local Sample Search
@@ -99,3 +100,9 @@ node scripts/enrich-edrsr-text.mjs --input data/index/edrsr-2026.sample.jsonl --
 ```
 
 The RTF cache is raw source data and must stay outside git.
+
+Analyze a normalized or text-enriched JSONL file:
+
+```bash
+node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl
+```

@@ -24,7 +24,7 @@ if (!args.input || !args.output) {
     const decision = input[index];
     const cachePath = path.join(cacheDir, `${safeFileName(decision.decision_id || String(index))}.rtf`);
     const rtf = await loadRtf(decision.source_url, cachePath, { offline });
-    const text = rtf ? rtfToText(rtf) : "";
+    const text = rtf.buffer ? rtfToText(rtf.buffer) : "";
     const articleExtraction = extractArticles(text);
     const outcome = classifyOutcome(text);
 
@@ -37,6 +37,8 @@ if (!args.input || !args.output) {
         outcome_label: outcome.label,
         outcome_confidence: outcome.confidence,
         key_excerpts: unique([...articleExtraction.excerpts, ...outcome.excerpts]).slice(0, 5),
+        text_status: rtf.status,
+        text_error: rtf.error,
         text_fetched_at: text ? new Date().toISOString() : "",
       }),
     );
@@ -62,26 +64,35 @@ async function loadJsonl(filePath, options = {}) {
 
 async function loadRtf(url, cachePath, options) {
   try {
-    return await readFile(cachePath);
+    return { buffer: await readFile(cachePath), status: "cached", error: "" };
   } catch (error) {
     if (error.code !== "ENOENT") throw error;
   }
 
-  if (options.offline || !url) return undefined;
+  if (!url) return { buffer: undefined, status: "missing_url", error: "" };
+  if (options.offline) return { buffer: undefined, status: "missing_cache_offline", error: "" };
 
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": "codex-sud-ingestion-prototype/0.1",
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "codex-sud-ingestion-prototype/0.1",
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Failed to fetch ${url}: ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      return {
+        buffer: undefined,
+        status: "fetch_error",
+        error: `HTTP ${response.status} ${response.statusText}`,
+      };
+    }
+
+    const buffer = Buffer.from(await response.arrayBuffer());
+    await writeFile(cachePath, buffer);
+    return { buffer, status: "fetched", error: "" };
+  } catch (error) {
+    return { buffer: undefined, status: "fetch_error", error: error.message };
   }
-
-  const buffer = Buffer.from(await response.arrayBuffer());
-  await writeFile(cachePath, buffer);
-  return buffer;
 }
 
 function rtfToText(buffer) {
@@ -221,8 +232,14 @@ function normalizeLawName(value) {
 }
 
 function classifyOutcome(text) {
-  const normalized = clean(text).toLocaleLowerCase("uk-UA");
+  const decisionPart = getDispositivePart(text);
+  const normalized = clean(decisionPart || text).toLocaleLowerCase("uk-UA");
   const rules = [
+    ["appeal_dismissed", 0.9, /апеляційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+задоволення/u],
+    ["cassation_dismissed", 0.9, /касаційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+задоволення/u],
+    ["appeal_granted", 0.9, /апеляційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}задовольнити/u],
+    ["cassation_granted", 0.9, /касаційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}задовольнити/u],
+    ["left_unchanged", 0.88, /рішенн[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+змін/u],
     ["partially_satisfied", 0.88, /задовольнити\s+частково|частково\s+задовольнити/u],
     ["dismissed", 0.88, /у\s+задоволенн[ія]\s+.{0,80}відмовити|відмовити\s+у\s+задоволенн[ія]/u],
     ["satisfied", 0.84, /позов\s+задовольнити|заяву\s+задовольнити|скаргу\s+задовольнити/u],
@@ -244,6 +261,24 @@ function classifyOutcome(text) {
   }
 
   return { label: "unknown", confidence: 0, excerpts: [] };
+}
+
+function getDispositivePart(text) {
+  const source = clean(text);
+  const markers = [
+    /п\s*о\s*с\s*т\s*а\s*н\s*о\s*в\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+    /у\s*х\s*в\s*а\s*л\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+    /в\s*и\s*р\s*і\s*ш\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+  ];
+  let lastIndex = -1;
+
+  for (const pattern of markers) {
+    for (const match of source.matchAll(pattern)) {
+      lastIndex = Math.max(lastIndex, match.index + match[0].length);
+    }
+  }
+
+  return lastIndex >= 0 ? source.slice(lastIndex) : source;
 }
 
 function excerptAround(text, index = 0, length = 0) {

@@ -99,6 +99,7 @@ Civil/commercial/admin examples:
 - proceeding closed;
 - appeal granted;
 - appeal dismissed;
+- decision left unchanged;
 - cassation granted;
 - cassation dismissed;
 - remanded.

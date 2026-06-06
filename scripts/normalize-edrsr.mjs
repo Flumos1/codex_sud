@@ -295,8 +295,14 @@ function normalizeLawName(value) {
 }
 
 function classifyOutcome(text) {
-  const normalized = normalizeText(text);
+  const decisionPart = getDispositivePart(text);
+  const normalized = normalizeText(decisionPart || text);
   const rules = [
+    ["appeal_dismissed", 0.9, /апеляційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+задоволення/u],
+    ["cassation_dismissed", 0.9, /касаційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+задоволення/u],
+    ["appeal_granted", 0.9, /апеляційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}задовольнити/u],
+    ["cassation_granted", 0.9, /касаційн[а-яіїєґa-z_]*\s+скарг[а-яіїєґa-z_]*\s+.{0,120}задовольнити/u],
+    ["left_unchanged", 0.88, /рішенн[а-яіїєґa-z_]*\s+.{0,120}залишити\s+без\s+змін/u],
     ["partially_satisfied", 0.88, /задовольнити\s+частково|частково\s+задовольнити/u],
     ["dismissed", 0.88, /у\s+задоволенн[ія]\s+.{0,80}відмовити|відмовити\s+у\s+задоволенн[ія]/u],
     ["satisfied", 0.84, /позов\s+задовольнити|заяву\s+задовольнити|скаргу\s+задовольнити/u],
@@ -318,6 +324,24 @@ function classifyOutcome(text) {
   }
 
   return { label: "unknown", confidence: 0, excerpts: [] };
+}
+
+function getDispositivePart(text) {
+  const source = clean(text);
+  const markers = [
+    /п\s*о\s*с\s*т\s*а\s*н\s*о\s*в\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+    /у\s*х\s*в\s*а\s*л\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+    /в\s*и\s*р\s*і\s*ш\s*и\s*(в|л\s*а|л\s*и)\s*[:\-]?/giu,
+  ];
+  let lastIndex = -1;
+
+  for (const pattern of markers) {
+    for (const match of source.matchAll(pattern)) {
+      lastIndex = Math.max(lastIndex, match.index + match[0].length);
+    }
+  }
+
+  return lastIndex >= 0 ? source.slice(lastIndex) : source;
 }
 
 function excerptAround(text, index = 0, length = 0) {
