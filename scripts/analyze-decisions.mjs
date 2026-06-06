@@ -55,6 +55,7 @@ function summarize(decisions) {
     top_courts: topCounts(countBy(decisions, "court_name"), 20),
     top_categories: topCounts(countBy(decisions, "category"), 20),
     top_articles: topCounts(countList(decisions, "cited_articles"), 30),
+    top_article_keys: topCounts(countArticleKeys(decisions), 30),
     top_laws: topCounts(countList(decisions, "cited_laws"), 20),
   };
 }
@@ -70,6 +71,16 @@ function countBy(items, key) {
 function countList(items, key) {
   return items.reduce((acc, item) => {
     for (const value of item[key] || []) {
+      const normalized = clean(value) || "unknown";
+      acc[normalized] = (acc[normalized] || 0) + 1;
+    }
+    return acc;
+  }, {});
+}
+
+function countArticleKeys(items) {
+  return items.reduce((acc, item) => {
+    for (const value of getArticleKeys(item)) {
       const normalized = clean(value) || "unknown";
       acc[normalized] = (acc[normalized] || 0) + 1;
     }
@@ -118,6 +129,7 @@ function printHuman(summary) {
   printSection("Regions", summary.by_region);
   printSection("Court levels", summary.by_level);
   printSection("Decision types", summary.by_decision_type);
+  printSection("Top normalized article keys", summary.top_article_keys);
   printSection("Top articles", summary.top_articles);
   printSection("Top courts", summary.top_courts);
 }
@@ -136,6 +148,32 @@ function printSection(title, rows) {
 
 function clean(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function getArticleKeys(item) {
+  if (item.cited_article_keys?.length) return item.cited_article_keys;
+  return (item.cited_articles || []).map(articleToKey);
+}
+
+function articleToKey(value) {
+  const text = String(value || "");
+  const article = text.match(/\d+(?:[-–]\d+)?/)?.[0] || "";
+  const law = normalizeLawName(text);
+  return article && law ? `${law}:${article}` : text;
+}
+
+function normalizeLawName(value) {
+  const text = String(value || "");
+  const known = [
+    ["КК України", /\bКК\b|Кримінальн/iu],
+    ["КПК України", /\bКПК\b|Кримінальн[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["КУпАП", /\bКУпАП\b|адміністративні правопорушення/iu],
+    ["ЦК України", /\bЦК\b|Цивільн[а-яіїєґa-z]*\s+кодекс/iu],
+    ["ЦПК України", /\bЦПК\b|Цивільн[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["ГПК України", /\bГПК\b|Господарськ[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["КАС України", /\bКАС\b|адміністративн[а-яіїєґa-z]*\s+судочинства/iu],
+  ];
+  return known.find(([, pattern]) => pattern.test(text))?.[0] || "";
 }
 
 function parseArgs(raw) {

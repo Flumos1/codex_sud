@@ -7,7 +7,7 @@ Working repository for a Ukrainian legal technology platform.
 Static pages:
 
 - `index.html` - public product start page.
-- `precedent-search.html` - precedent/case-law search concept.
+- `precedent-search.html` - precedent/case-law search prototype with local JSONL loading.
 - `case-status.html` - user-driven case status flow for `court.gov.ua/fair/`.
 - `registries.html` - registry intelligence catalog concept.
 
@@ -106,3 +106,5 @@ Analyze a normalized or text-enriched JSONL file:
 ```bash
 node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl
 ```
+
+Open `precedent-search.html` through a local static server to let the browser load JSONL data. The page tries `data/index/edrsr-2026.first20.text.jsonl` first and falls back to `data/sample/edrsr-sample.jsonl`.

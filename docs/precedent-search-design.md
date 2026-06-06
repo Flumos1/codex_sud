@@ -65,6 +65,12 @@ Each decision card should show:
 - official source link;
 - save button.
 
+Development prototype:
+
+- `precedent-search.html` tries to load local real-data JSONL from `data/index/edrsr-2026.first20.text.jsonl`;
+- if the local real-data file is absent, it falls back to `data/sample/edrsr-sample.jsonl`;
+- article filters can use normalized keys such as `КАС України:311`.
+
 ### Analytics View
 
 Show:

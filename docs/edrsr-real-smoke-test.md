@@ -46,6 +46,12 @@ Search by article and outcome:
 node scripts/search-sample.mjs --input data/index/edrsr-2026.first20.text.jsonl --article "311 КАС" --outcome appeal_dismissed --json
 ```
 
+Search by normalized article key:
+
+```bash
+node scripts/search-sample.mjs --input data/index/edrsr-2026.first20.text.jsonl --article "КАС України:311" --outcome appeal_dismissed --json
+```
+
 ## Observed Results
 
 For the first 20 metadata rows:
@@ -71,8 +77,10 @@ Top extracted articles in this small administrative-law slice included:
 
 The article/outcome search found 2 real decisions for:
 
-- article: `311 КАС`;
+- article: `КАС України:311`;
 - outcome: `appeal_dismissed`.
+
+The local UI prototype at `precedent-search.html` can load `data/index/edrsr-2026.first20.text.jsonl` when served through a local HTTP server. The same filter found case numbers `320/5009/25` and `320/3913/24`.
 
 ## Important Findings
 

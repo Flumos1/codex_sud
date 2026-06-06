@@ -30,7 +30,7 @@ async function loadJsonl(file) {
 
 function search(items, query) {
   return items.filter((item) => {
-    if (query.article && !matchesList(item.cited_articles, query.article)) return false;
+    if (query.article && !matchesArticle(item, query.article)) return false;
     if (query.law && !matchesList(item.cited_laws, query.law)) return false;
     if (query.region && !includesText(item.court_region, query.region)) return false;
     if (query.court && !includesText(item.court_name, query.court)) return false;
@@ -64,11 +64,41 @@ function countBy(items, key) {
 
 function countArticles(items) {
   return items.reduce((acc, item) => {
-    for (const article of item.cited_articles || []) {
+    for (const article of getArticleKeys(item)) {
       acc[article] = (acc[article] || 0) + 1;
     }
     return acc;
   }, {});
+}
+
+function matchesArticle(item, needle) {
+  return [...getArticleKeys(item), ...(item.cited_articles || [])].some((value) => includesText(value, needle));
+}
+
+function getArticleKeys(item) {
+  if (item.cited_article_keys?.length) return item.cited_article_keys;
+  return (item.cited_articles || []).map(articleToKey);
+}
+
+function articleToKey(value) {
+  const text = String(value || "");
+  const article = text.match(/\d+(?:[-–]\d+)?/)?.[0] || "";
+  const law = normalizeLawName(text);
+  return article && law ? `${law}:${article}` : text;
+}
+
+function normalizeLawName(value) {
+  const text = String(value || "");
+  const known = [
+    ["КК України", /\bКК\b|Кримінальн/iu],
+    ["КПК України", /\bКПК\b|Кримінальн[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["КУпАП", /\bКУпАП\b|адміністративні правопорушення/iu],
+    ["ЦК України", /\bЦК\b|Цивільн[а-яіїєґa-z]*\s+кодекс/iu],
+    ["ЦПК України", /\bЦПК\b|Цивільн[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["ГПК України", /\bГПК\b|Господарськ[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["КАС України", /\bКАС\b|адміністративн[а-яіїєґa-z]*\s+судочинства/iu],
+  ];
+  return known.find(([, pattern]) => pattern.test(text))?.[0] || "";
 }
 
 function matchesList(values, needle) {

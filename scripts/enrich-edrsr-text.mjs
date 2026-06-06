@@ -33,6 +33,7 @@ if (!args.input || !args.output) {
         ...decision,
         text,
         cited_articles: articleExtraction.articles,
+        cited_article_keys: articleExtraction.articleKeys,
         cited_laws: articleExtraction.laws,
         outcome_label: outcome.label,
         outcome_confidence: outcome.confidence,
@@ -181,6 +182,7 @@ function isSkippedGroup(raw, index) {
 
 function extractArticles(text) {
   const articles = new Set();
+  const articleKeys = new Set();
   const laws = new Set();
   const excerpts = [];
   const normalized = clean(text);
@@ -205,12 +207,14 @@ function extractArticles(text) {
     const law = normalizeLawName(match[2]);
     if (!article || !law) continue;
     articles.add(`${article} ${law}`);
+    articleKeys.add(normalizeArticleKey(article, law));
     laws.add(law);
     excerpts.push(excerptAround(normalized, match.index, match[0].length));
   }
 
   return {
     articles: [...articles],
+    articleKeys: [...articleKeys],
     laws: [...laws],
     excerpts: unique(excerpts),
   };
@@ -220,15 +224,19 @@ function normalizeLawName(value) {
   const text = clean(value).replace(/[.,;:)\]]+$/g, "");
   const known = [
     ["КК України", /\bКК\b|Кримінальн/iu],
-    ["КПК України", /\bКПК\b|Кримінальн\w+\s+процесуальн/iu],
+    ["КПК України", /\bКПК\b|Кримінальн[а-яіїєґa-z]*\s+процесуальн/iu],
     ["КУпАП", /\bКУпАП\b|адміністративні правопорушення/iu],
-    ["ЦК України", /\bЦК\b|Цивільн\w+\s+кодекс/iu],
-    ["ЦПК України", /\bЦПК\b|Цивільн\w+\s+процесуальн/iu],
-    ["ГПК України", /\bГПК\b|Господарськ\w+\s+процесуальн/iu],
-    ["КАС України", /\bКАС\b|адміністративн\w+\s+судочинства/iu],
+    ["ЦК України", /\bЦК\b|Цивільн[а-яіїєґa-z]*\s+кодекс/iu],
+    ["ЦПК України", /\bЦПК\b|Цивільн[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["ГПК України", /\bГПК\b|Господарськ[а-яіїєґa-z]*\s+процесуальн/iu],
+    ["КАС України", /\bКАС\b|адміністративн[а-яіїєґa-z]*\s+судочинства/iu],
   ];
   const hit = known.find(([, pattern]) => pattern.test(text));
   return hit ? hit[0] : text.slice(0, 80);
+}
+
+function normalizeArticleKey(article, law) {
+  return `${normalizeLawName(law)}:${clean(article).replace(/\s+/g, "")}`;
 }
 
 function classifyOutcome(text) {

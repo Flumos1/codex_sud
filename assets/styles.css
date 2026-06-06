@@ -443,6 +443,64 @@ select:focus {
   gap: 4px;
 }
 
+.facet-list {
+  display: grid;
+  gap: 16px;
+}
+
+.facet-group {
+  display: grid;
+  gap: 8px;
+}
+
+.facet-group h3 {
+  font-size: 16px;
+  margin-bottom: 0;
+}
+
+.facet-row {
+  align-items: center;
+  background: var(--surface-2);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 9px 11px;
+}
+
+.precedent-item {
+  background: var(--surface);
+}
+
+.result-head {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.result-head h3 {
+  margin-bottom: 0;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.tag-list span {
+  background: #eef5f8;
+  color: var(--accent-2);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 5px 8px;
+}
+
+.result-actions {
+  font-weight: 700;
+}
+
 .empty-state {
   color: var(--muted);
   margin-bottom: 0;

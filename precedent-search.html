@@ -33,22 +33,22 @@
       </section>
 
       <section class="section split align-start">
-        <form class="panel form-panel" aria-label="Фильтры поиска практики">
+        <form class="panel form-panel" id="precedentForm" aria-label="Фильтры поиска практики">
           <p class="eyebrow">Критерии</p>
           <h2>Поиск по статье и контексту</h2>
           <label>
             Статья или норма
-            <input type="text" placeholder="Например: ст. 130 КУпАП, ст. 625 ЦК">
+            <input id="articleInput" name="article" type="text" placeholder="Например: 311 КАС, 130 КУпАП, 625 ЦК">
           </label>
           <label>
             Контекст / ключевые слова
-            <textarea rows="4" placeholder="Опишите ситуацию или аргумент: долг, моральный вред, отмена постановления..."></textarea>
+            <textarea id="queryInput" name="q" rows="4" placeholder="Опишите ситуацию или аргумент: долг, моральный вред, отмена постановления..."></textarea>
           </label>
           <div class="form-grid">
             <label>
               Регион
-              <select>
-                <option>Вся Украина</option>
+              <select id="regionInput" name="region">
+                <option value="">Вся Украина</option>
                 <option>м. Київ</option>
                 <option>Одеська область</option>
                 <option>Дніпропетровська область</option>
@@ -57,29 +57,29 @@
             </label>
             <label>
               Инстанция
-              <select>
-                <option>Все инстанции</option>
-                <option>Первая инстанция</option>
-                <option>Апелляция</option>
-                <option>Кассация</option>
+              <select id="levelInput" name="level">
+                <option value="">Все инстанции</option>
+                <option value="Перша">Первая инстанция</option>
+                <option value="Апеляційна">Апелляция</option>
+                <option value="Касаційна">Кассация</option>
               </select>
             </label>
           </div>
           <div class="form-grid">
             <label>
               С даты
-              <input type="date">
+              <input id="fromInput" name="from" type="date">
             </label>
             <label>
               По дату
-              <input type="date">
+              <input id="toInput" name="to" type="date">
             </label>
           </div>
           <div class="form-grid">
             <label>
               Тип решения
-              <select>
-                <option>Любой</option>
+              <select id="typeInput" name="type">
+                <option value="">Любой</option>
                 <option>Рішення</option>
                 <option>Постанова</option>
                 <option>Ухвала</option>
@@ -88,44 +88,53 @@
             </label>
             <label>
               Результат
-              <select>
-                <option>Любой</option>
-                <option>В пользу заявителя / истца</option>
-                <option>Отказано</option>
-                <option>Частично удовлетворено</option>
-                <option>Отменено</option>
-                <option>Направлено на новое рассмотрение</option>
+              <select id="outcomeInput" name="outcome">
+                <option value="">Любой</option>
+                <option value="appeal_dismissed">Апелляция отклонена</option>
+                <option value="cassation_dismissed">Кассация отклонена</option>
+                <option value="satisfied">Удовлетворено</option>
+                <option value="dismissed">Отказано</option>
+                <option value="partially_satisfied">Частично удовлетворено</option>
+                <option value="cancelled">Отменено</option>
+                <option value="remanded">Направлено на новое рассмотрение</option>
               </select>
             </label>
           </div>
-          <button class="button primary" type="button">Показать практику</button>
-          <p class="note">Сейчас это интерфейсный прототип. Данные подключаются на следующем этапе через открытые datasets ЄДРСР.</p>
+          <button class="button primary" type="submit">Показать практику</button>
+          <p class="note" id="dataSourceNote">Загрузка локального индекса...</p>
         </form>
 
         <section class="panel saved-panel" aria-labelledby="practiceSummary">
-          <p class="eyebrow">Будущий результат</p>
+          <p class="eyebrow">Результат</p>
           <h2 id="practiceSummary">Сводка по практике</h2>
-          <div class="metric-grid">
+          <div class="metric-grid" id="practiceMetrics">
             <div>
-              <strong>1 248</strong>
+              <strong>0</strong>
               <span>найденных решений</span>
             </div>
             <div>
-              <strong>37%</strong>
-              <span>позитивная практика</span>
+              <strong>0</strong>
+              <span>с текстом</span>
             </div>
             <div>
-              <strong>18%</strong>
-              <span>отмена / новое рассмотрение</span>
+              <strong>0</strong>
+              <span>с определенным исходом</span>
             </div>
           </div>
-          <div class="rule-list compact">
-            <div>Сильные решения для цитирования</div>
-            <div>Противоположная практика</div>
-            <div>Аргументы, которые суды принимают</div>
-            <div>Регионы с отличающейся практикой</div>
+          <div class="facet-list" id="practiceFacets">
+            <p class="empty-state">Введите критерии или нажмите поиск, чтобы увидеть распределение.</p>
           </div>
         </section>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Решения</p>
+          <h2>Карточки найденной практики</h2>
+        </div>
+        <div class="case-list" id="precedentResults">
+          <p class="empty-state">Результаты появятся после загрузки локального sample.</p>
+        </div>
       </section>
 
       <section class="section">
@@ -161,5 +170,6 @@
       <span>Legal OS Ukraine</span>
       <span>Прецедентный поиск строится на открытых данных судебных решений.</span>
     </footer>
+    <script src="assets/precedent-search.js"></script>
   </body>
 </html>

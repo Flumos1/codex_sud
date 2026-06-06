@@ -229,6 +229,8 @@ Analyze the resulting local index:
 node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl
 ```
 
+Normalized article keys are stored in `cited_article_keys`, for example `КАС України:311`. The UI prototype and CLI search can use these keys to avoid splitting the same norm across short and long law names.
+
 ## Do Not Commit
 
 - downloaded full archives;
