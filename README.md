@@ -124,6 +124,9 @@ Analyze a normalized or text-enriched JSONL file:
 
 ```bash
 node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl
+node scripts/analyze-decisions.mjs --input data/index/edrsr-2026.sample.text.jsonl --article "КАС України:333" --json
 ```
+
+The analysis command supports the same practical filters as search and reports distributions by outcome, year, region, court level, court, article, plus outcome pivots by year and region.
 
 Open `precedent-search.html` through a local static server to let the browser load JSONL data. The page tries `data/index/edrsr-2026.first20.text.jsonl` first and falls back to `data/sample/edrsr-sample.jsonl`.
