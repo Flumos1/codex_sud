@@ -20,6 +20,17 @@ test("search API returns filtered and limited decisions", async () => {
     assert.equal(payload.summary.total, 2);
     assert.equal(payload.results.length, 1);
     assert.equal(payload.results[0].case_number, "760/5005/26");
+    assert.equal("text" in payload.results[0], false);
+  });
+});
+
+test("search API includes full text only when explicitly requested", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/search?article=625%20%D0%A6%D0%9A&limit=1&include_text=1`);
+
+    assert.equal(payload.query.include_text, undefined);
+    assert.equal(payload.results.length, 1);
+    assert.match(payload.results[0].text, /Позов про стягнення боргу/);
   });
 });
 

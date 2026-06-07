@@ -51,9 +51,13 @@ export function createSearchApiServer(decisions, options = {}) {
 
       if (url.pathname === "/api/search") {
         const query = queryFromSearchParams(url.searchParams);
+        const includeText = query.include_text === "1" || query.include_text === "true";
+        delete query.include_text;
         const matchedResults = filterDecisions(decisions, query);
         const sortedResults = sortResults(matchedResults, query.sort);
-        const results = limitResults(sortedResults, query.limit || 20);
+        const results = limitResults(sortedResults, query.limit || 20).map((decision) =>
+          projectDecision(decision, { includeText }),
+        );
         sendJson(response, 200, {
           query,
           summary: summarizeSearchResults(matchedResults),
@@ -88,6 +92,39 @@ export async function loadJsonl(filePath) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => JSON.parse(line));
+}
+
+function projectDecision(decision, options = {}) {
+  const projected = {
+    decision_id: decision.decision_id,
+    source_url: decision.source_url,
+    source_dataset: decision.source_dataset,
+    source_attribution: decision.source_attribution,
+    case_number: decision.case_number,
+    proceeding_number: decision.proceeding_number,
+    court_name: decision.court_name,
+    court_region: decision.court_region,
+    court_level: decision.court_level,
+    court_code: decision.court_code,
+    decision_date: decision.decision_date,
+    registration_date: decision.registration_date,
+    publication_date: decision.publication_date,
+    proceeding_type: decision.proceeding_type,
+    decision_type: decision.decision_type,
+    category: decision.category,
+    judge_names: decision.judge_names,
+    cited_articles: decision.cited_articles || [],
+    cited_article_keys: decision.cited_article_keys || [],
+    cited_laws: decision.cited_laws || [],
+    outcome_label: decision.outcome_label,
+    outcome_confidence: decision.outcome_confidence,
+    key_excerpts: decision.key_excerpts || [],
+    text_status: decision.text_status,
+    text_error: decision.text_error,
+  };
+
+  if (options.includeText) projected.text = decision.text || "";
+  return projected;
 }
 
 async function sendStatic(response, rootDir, pathname) {

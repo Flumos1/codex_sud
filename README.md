@@ -138,6 +138,8 @@ Useful endpoints:
 - `GET /api/search?article=625%20%D0%A6%D0%9A&limit=10`
 - `GET /api/analyze?article=%D0%9A%D0%90%D0%A1%20%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B8%3A333`
 
+`/api/search` returns compact decision cards by default. Add `include_text=1` only for development or explicit full-text review flows.
+
 `precedent-search.html` tries the API at `http://127.0.0.1:8787` first and falls back to local JSONL samples if the API is not running. You can point it to another API base with `precedent-search.html?api=http://127.0.0.1:8787`.
 
 Analyze a normalized or text-enriched JSONL file:
