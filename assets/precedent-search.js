@@ -1,6 +1,7 @@
 (function () {
   const localRealSample = "data/index/edrsr-2026.first20.text.jsonl";
   const fallbackSample = "data/sample/edrsr-sample.jsonl";
+  const apiParam = new URLSearchParams(window.location.search).get("api");
   const form = document.querySelector("#precedentForm");
   const metrics = document.querySelector("#practiceMetrics");
   const facets = document.querySelector("#practiceFacets");
@@ -8,23 +9,76 @@
   const sourceNote = document.querySelector("#dataSourceNote");
   let decisions = [];
   let activeSource = "";
+  let apiBase = "";
 
   if (!form || !metrics || !facets || !results) return;
 
-  loadData().then((loaded) => {
+  initialize();
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    if (apiBase) {
+      await renderFromApi(new FormData(form));
+      return;
+    }
+    renderLocal(filterDecisions(decisions, new FormData(form)));
+  });
+
+  async function initialize() {
+    apiBase = await detectApiBase();
+    if (apiBase) {
+      activeSource = apiBase;
+      sourceNote.textContent = `Подключен локальный Search API: ${apiBase}.`;
+      await renderFromApi(new FormData(form));
+      return;
+    }
+
+    const loaded = await loadData();
     decisions = loaded.items;
     activeSource = loaded.source;
     sourceNote.textContent =
       activeSource === localRealSample
         ? "Подключен локальный real-data sample EDRSR из data/index."
-        : "Подключен synthetic sample. Для real-data sample запустите ingestion локально.";
-    render(decisions);
-  });
+        : "Подключен synthetic sample. Для real-data sample запустите ingestion локально или Search API.";
+    renderLocal(decisions);
+  }
 
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    render(filterDecisions(decisions, new FormData(form)));
-  });
+  async function detectApiBase() {
+    const candidates = [
+      apiParam,
+      `${window.location.protocol}//${window.location.hostname || "127.0.0.1"}:8787`,
+      "http://127.0.0.1:8787",
+    ].filter(Boolean);
+
+    for (const candidate of [...new Set(candidates)]) {
+      try {
+        const response = await fetch(`${candidate.replace(/\/$/u, "")}/health`, { cache: "no-store" });
+        if (response.ok) return candidate.replace(/\/$/u, "");
+      } catch (error) {
+        // Local fallback is expected when the API server is not running.
+      }
+    }
+    return "";
+  }
+
+  async function renderFromApi(data) {
+    const filters = queryFromFormData(data);
+    const searchQuery = { ...filters, sort: "date_desc", limit: "20" };
+    const [searchPayload, analysisPayload] = await Promise.all([
+      fetchJson(`${apiBase}/api/search?${toQueryString(searchQuery)}`),
+      fetchJson(`${apiBase}/api/analyze?${toQueryString(filters)}`),
+    ]);
+
+    renderMetricsFromAnalysis(analysisPayload);
+    renderFacetsFromAnalysis(analysisPayload);
+    renderResults((searchPayload.results || []).map(normalizeDecision));
+  }
+
+  async function fetchJson(url) {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    return response.json();
+  }
 
   async function loadData() {
     const real = await tryLoadJsonl(localRealSample);
@@ -55,8 +109,8 @@
     };
   }
 
-  function filterDecisions(items, data) {
-    const query = {
+  function queryFromFormData(data) {
+    return {
       article: clean(data.get("article")),
       q: clean(data.get("q")),
       region: clean(data.get("region")),
@@ -66,6 +120,18 @@
       type: clean(data.get("type")),
       outcome: clean(data.get("outcome")),
     };
+  }
+
+  function toQueryString(query) {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value) params.set(key, value);
+    }
+    return params.toString();
+  }
+
+  function filterDecisions(items, data) {
+    const query = queryFromFormData(data);
 
     return items.filter((item) => {
       if (query.article && !matchesArticle(item, query.article)) return false;
@@ -80,7 +146,7 @@
     });
   }
 
-  function render(items) {
+  function renderLocal(items) {
     renderMetrics(items);
     renderFacets(items);
     renderResults(items.slice(0, 20));
@@ -96,6 +162,14 @@
     `;
   }
 
+  function renderMetricsFromAnalysis(summary) {
+    metrics.innerHTML = `
+      <div><strong>${summary.total || 0}</strong><span>найденных решений</span></div>
+      <div><strong>${summary.text_coverage?.count || 0}</strong><span>с текстом решения</span></div>
+      <div><strong>${summary.outcome_coverage?.count || 0}</strong><span>с определенным исходом</span></div>
+    `;
+  }
+
   function renderFacets(items) {
     const outcomes = topCounts(countBy(items, "outcome_label"), 5);
     const regions = topCounts(countBy(items, "court_region"), 5);
@@ -104,6 +178,14 @@
       ${renderFacetGroup("Исходы", outcomes)}
       ${renderFacetGroup("Регионы", regions)}
       ${renderFacetGroup("Нормы", articles)}
+    `;
+  }
+
+  function renderFacetsFromAnalysis(summary) {
+    facets.innerHTML = `
+      ${renderFacetGroup("Исходы", summary.by_outcome || [])}
+      ${renderFacetGroup("Регионы", summary.by_region || [])}
+      ${renderFacetGroup("Нормы", summary.top_article_keys || [])}
     `;
   }
 
