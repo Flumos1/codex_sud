@@ -1,6 +1,6 @@
 # EDRSR Real Data Smoke Test
 
-Last run: 2026-06-06
+Last run: 2026-06-07
 
 This document records the first local check against real EDRSR 2026 data. It intentionally does not include raw court-decision text or generated indexes.
 
@@ -107,4 +107,8 @@ Outcome classification must be based primarily on the dispositive/resolution par
 1. Split article extraction into normalized law/article fields, so `328 КАС України` and `328 Кодексу адміністративного судочинства України` are treated as the same norm.
 2. Expand outcome rules by decision type and court level.
 3. Add a small UI/data bridge so `precedent-search.html` can load a local JSONL/JSON sample during development.
-4. Move duplicated article/outcome helpers from scripts into a shared local module.
+4. Add regression tests around `scripts/legal-text-utils.mjs` using short anonymized snippets from representative decision types.
+
+## Implemented Notes
+
+The Node-side ingestion/search tools now share `scripts/legal-text-utils.mjs` for article extraction, normalized article keys, outcome labels, excerpts, and text matching. This keeps normalization, RTF enrichment, CLI search, and analysis aligned while the prototype grows.

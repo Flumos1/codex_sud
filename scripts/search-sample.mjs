@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { getArticleKeys, includesText } from "./legal-text-utils.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const samplePath = path.join(root, "data", "sample", "edrsr-sample.jsonl");
@@ -75,45 +76,8 @@ function matchesArticle(item, needle) {
   return [...getArticleKeys(item), ...(item.cited_articles || [])].some((value) => includesText(value, needle));
 }
 
-function getArticleKeys(item) {
-  if (item.cited_article_keys?.length) return item.cited_article_keys;
-  return (item.cited_articles || []).map(articleToKey);
-}
-
-function articleToKey(value) {
-  const text = String(value || "");
-  const article = text.match(/\d+(?:[-–]\d+)?/)?.[0] || "";
-  const law = normalizeLawName(text);
-  return article && law ? `${law}:${article}` : text;
-}
-
-function normalizeLawName(value) {
-  const text = String(value || "");
-  const known = [
-    ["КК України", /\bКК\b|Кримінальн/iu],
-    ["КПК України", /\bКПК\b|Кримінальн[а-яіїєґa-z]*\s+процесуальн/iu],
-    ["КУпАП", /\bКУпАП\b|адміністративні правопорушення/iu],
-    ["ЦК України", /\bЦК\b|Цивільн[а-яіїєґa-z]*\s+кодекс/iu],
-    ["ЦПК України", /\bЦПК\b|Цивільн[а-яіїєґa-z]*\s+процесуальн/iu],
-    ["ГПК України", /\bГПК\b|Господарськ[а-яіїєґa-z]*\s+процесуальн/iu],
-    ["КАС України", /\bКАС\b|адміністративн[а-яіїєґa-z]*\s+судочинства/iu],
-  ];
-  return known.find(([, pattern]) => pattern.test(text))?.[0] || "";
-}
-
 function matchesList(values, needle) {
   return (values || []).some((value) => includesText(value, needle));
-}
-
-function includesText(value, needle) {
-  return normalize(value).includes(normalize(needle));
-}
-
-function normalize(value) {
-  return String(value || "")
-    .toLocaleLowerCase("uk-UA")
-    .replace(/\s+/g, " ")
-    .trim();
 }
 
 function parseArgs(raw) {

@@ -101,6 +101,8 @@ node scripts/enrich-edrsr-text.mjs --input data/index/edrsr-2026.sample.jsonl --
 
 The RTF cache is raw source data and must stay outside git.
 
+Shared legal text helpers live in `scripts/legal-text-utils.mjs`. Normalization, RTF enrichment, CLI search, and analysis use the same article extraction, normalized article keys, outcome labels, and text matching rules.
+
 Analyze a normalized or text-enriched JSONL file:
 
 ```bash
