@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { clean, getArticleKeys, includesText } from "./legal-text-utils.mjs";
+import { clean, getArticleKeys } from "./legal-text-utils.mjs";
+import { filterDecisions } from "./search-utils.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 
@@ -30,22 +31,6 @@ async function loadJsonl(filePath) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => JSON.parse(line));
-}
-
-function filterDecisions(decisions, query) {
-  return decisions.filter((decision) => {
-    if (query.article && !matchesArticle(decision, query.article)) return false;
-    if (query.law && !matchesList(decision.cited_laws, query.law)) return false;
-    if (query.region && !includesText(decision.court_region, query.region)) return false;
-    if (query.court && !includesText(decision.court_name, query.court)) return false;
-    if (query.level && decision.court_level !== query.level) return false;
-    if (query.type && decision.decision_type !== query.type) return false;
-    if (query.outcome && decision.outcome_label !== query.outcome) return false;
-    if (query.from && decision.decision_date < query.from) return false;
-    if (query.to && decision.decision_date > query.to) return false;
-    if (query.q && !includesText([decision.text, decision.case_number, decision.court_name].join(" "), query.q)) return false;
-    return true;
-  });
 }
 
 function summarize(decisions, sourceTotal = decisions.length, query = {}) {
@@ -152,14 +137,6 @@ function pivotCounts(items, rowGetter, columnGetter) {
 
 function yearOf(item) {
   return clean(item.decision_date).slice(0, 4) || "unknown";
-}
-
-function matchesArticle(item, needle) {
-  return [...getArticleKeys(item), ...(item.cited_articles || [])].some((value) => includesText(value, needle));
-}
-
-function matchesList(values, needle) {
-  return (values || []).some((value) => includesText(value, needle));
 }
 
 function topCounts(counts, limit) {

@@ -120,6 +120,8 @@ The RTF cache is raw source data and must stay outside git.
 
 Shared legal text helpers live in `scripts/legal-text-utils.mjs`. Normalization, RTF enrichment, CLI search, and analysis use the same article extraction, normalized article keys, outcome labels, and text matching rules.
 
+Shared search helpers live in `scripts/search-utils.mjs`. CLI search and filtered analytics use the same filters, sorting, limits, and search summaries, which is the intended base for a future API endpoint.
+
 Analyze a normalized or text-enriched JSONL file:
 
 ```bash
