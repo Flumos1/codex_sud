@@ -11,11 +11,16 @@ const inputPath = args.input ? path.resolve(args.input) : samplePath;
 delete args.input;
 
 const decisions = await loadJsonl(inputPath);
-const results = search(decisions, args);
-const summary = summarize(results);
+const matchedResults = search(decisions, args);
+const sortedResults = sortResults(matchedResults, args.sort);
+const results = limitResults(sortedResults, args.limit);
+const summary = summarize(matchedResults);
+const output = { query: args, summary, results };
 
-if (args.json) {
-  process.stdout.write(JSON.stringify({ query: args, summary, results }, null, 2));
+if (args.csv) {
+  process.stdout.write(toCsv(results));
+} else if (args.json) {
+  process.stdout.write(JSON.stringify(output, null, 2));
 } else {
   printHuman(args, summary, results);
 }
@@ -53,6 +58,44 @@ function summarize(items) {
     by_level: countBy(items, "court_level"),
     by_article: countArticles(items),
   };
+}
+
+function sortResults(items, sortMode = "date_desc") {
+  const copy = [...items];
+  const mode = String(sortMode || "date_desc");
+
+  if (mode === "date_asc") {
+    return copy.sort((a, b) => compareDates(a, b) || compareText(a.case_number, b.case_number));
+  }
+
+  if (mode === "court") {
+    return copy.sort((a, b) => compareText(a.court_name, b.court_name) || compareDatesDesc(a, b));
+  }
+
+  if (mode === "outcome") {
+    return copy.sort((a, b) => compareText(a.outcome_label, b.outcome_label) || compareDatesDesc(a, b));
+  }
+
+  return copy.sort((a, b) => compareDatesDesc(a, b) || compareText(a.case_number, b.case_number));
+}
+
+function limitResults(items, limit) {
+  if (!limit) return items;
+  const parsed = Number.parseInt(limit, 10);
+  if (!Number.isFinite(parsed) || parsed < 1) return items;
+  return items.slice(0, parsed);
+}
+
+function compareDates(a, b) {
+  return String(a.decision_date || "").localeCompare(String(b.decision_date || ""));
+}
+
+function compareDatesDesc(a, b) {
+  return compareDates(b, a);
+}
+
+function compareText(a, b) {
+  return String(a || "").localeCompare(String(b || ""), "uk");
 }
 
 function countBy(items, key) {
@@ -102,6 +145,7 @@ function printHuman(query, summary, results) {
   console.log(JSON.stringify(query, null, 2));
   console.log("");
   console.log(`Found: ${summary.total}`);
+  if (query.limit && results.length < summary.total) console.log(`Showing: ${results.length}`);
   console.log(`By outcome: ${JSON.stringify(summary.by_outcome)}`);
   console.log(`By region: ${JSON.stringify(summary.by_region)}`);
   console.log(`By level: ${JSON.stringify(summary.by_level)}`);
@@ -115,4 +159,36 @@ function printHuman(query, summary, results) {
     console.log(`Source: ${item.source_url}`);
     console.log("");
   }
+}
+
+function toCsv(items) {
+  const headers = [
+    "case_number",
+    "decision_date",
+    "court_name",
+    "court_region",
+    "court_level",
+    "decision_type",
+    "outcome_label",
+    "cited_article_keys",
+    "source_url",
+  ];
+  const rows = items.map((item) => [
+    item.case_number,
+    item.decision_date,
+    item.court_name,
+    item.court_region,
+    item.court_level,
+    item.decision_type,
+    item.outcome_label,
+    getArticleKeys(item).join("; "),
+    item.source_url,
+  ]);
+  return `${[headers, ...rows].map((row) => row.map(csvCell).join(",")).join("\n")}\n`;
+}
+
+function csvCell(value) {
+  const text = String(value || "");
+  if (!/[",\n\r]/.test(text)) return text;
+  return `"${text.replace(/"/g, '""')}"`;
 }

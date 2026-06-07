@@ -44,6 +44,13 @@ JSON output:
 node scripts/search-sample.mjs --article "130 КУпАП" --outcome remanded --json
 ```
 
+Limit, sort, or export results:
+
+```bash
+node scripts/search-sample.mjs --article "625 ЦК" --sort date_desc --limit 10
+node scripts/search-sample.mjs --article "130 КУпАП" --outcome remanded --csv
+```
+
 Search a normalized local JSONL file:
 
 ```bash
@@ -62,7 +69,10 @@ Supported filters:
 - `--from`
 - `--to`
 - `--q`
+- `--sort date_desc|date_asc|court|outcome`
+- `--limit`
 - `--json`
+- `--csv`
 
 ## Data Safety
 
