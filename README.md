@@ -143,6 +143,7 @@ Useful endpoints:
 `/api/decisions/:decision_id` returns the full decision text for a single explicit review flow.
 
 `precedent-search.html` tries the API at `http://127.0.0.1:8787` first and falls back to local JSONL samples if the API is not running. You can point it to another API base with `precedent-search.html?api=http://127.0.0.1:8787`.
+Search result cards can open a full decision detail dialog through `/api/decisions/:decision_id`, with a local JSONL fallback during static development.
 
 Analyze a normalized or text-enriched JSONL file:
 

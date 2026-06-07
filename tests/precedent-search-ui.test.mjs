@@ -40,6 +40,19 @@ test("precedent search UI uses the local API when available", async () => {
     assert.match(elements["#dataSourceNote"].textContent, /Search API/);
     assert.match(elements["#practiceMetrics"].innerHTML, /<strong>5<\/strong>/);
     assert.match(elements["#precedentResults"].innerHTML, /760\/5005\/26/);
+
+    await elements["#precedentResults"].dispatch("click", {
+      target: {
+        closest(selector) {
+          if (selector !== "[data-open-decision]") return null;
+          return { dataset: { openDecision: "sample-005" } };
+        },
+      },
+    });
+
+    assert.equal(elements["#decisionDialog"].open, true);
+    assert.match(elements["#decisionDialogTitle"].textContent, /760\/5005\/26/);
+    assert.match(elements["#decisionDetail"].innerHTML, /Позов про стягнення боргу/);
   } finally {
     await new Promise((resolve, reject) => {
       server.close((error) => (error ? reject(error) : resolve()));
@@ -52,6 +65,10 @@ function createElements() {
     "#precedentForm": {
       addEventListener() {},
     },
+    "#decisionDialog": createDialogElement(),
+    "#decisionDialogClose": createElement(),
+    "#decisionDialogTitle": createElement(),
+    "#decisionDetail": createElement(),
     "#practiceMetrics": createElement(),
     "#practiceFacets": createElement(),
     "#precedentResults": createElement(),
@@ -60,9 +77,28 @@ function createElements() {
 }
 
 function createElement() {
+  const listeners = {};
   return {
+    addEventListener(type, handler) {
+      listeners[type] = handler;
+    },
+    async dispatch(type, event) {
+      if (listeners[type]) await listeners[type](event);
+    },
     innerHTML: "",
     textContent: "",
+  };
+}
+
+function createDialogElement() {
+  return {
+    open: false,
+    close() {
+      this.open = false;
+    },
+    showModal() {
+      this.open = true;
+    },
   };
 }
 

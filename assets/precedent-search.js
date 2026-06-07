@@ -7,6 +7,10 @@
   const facets = document.querySelector("#practiceFacets");
   const results = document.querySelector("#precedentResults");
   const sourceNote = document.querySelector("#dataSourceNote");
+  const decisionDialog = document.querySelector("#decisionDialog");
+  const decisionDialogTitle = document.querySelector("#decisionDialogTitle");
+  const decisionDialogClose = document.querySelector("#decisionDialogClose");
+  const decisionDetail = document.querySelector("#decisionDetail");
   let decisions = [];
   let activeSource = "";
   let apiBase = "";
@@ -22,6 +26,16 @@
       return;
     }
     renderLocal(filterDecisions(decisions, new FormData(form)));
+  });
+
+  results.addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-open-decision]");
+    if (!button) return;
+    await openDecision(button.dataset.openDecision);
+  });
+
+  decisionDialogClose?.addEventListener("click", () => {
+    decisionDialog?.close();
   });
 
   async function initialize() {
@@ -212,6 +226,9 @@
         const source = item.source_url
           ? `<a href="${escapeAttribute(item.source_url)}" target="_blank" rel="noreferrer">Официальный текст</a>`
           : '<span>Текст недоступен</span>';
+        const detailButton = item.decision_id
+          ? `<button class="link-button" type="button" data-open-decision="${escapeAttribute(item.decision_id)}">Открыть решение</button>`
+          : "";
         return `
           <article class="case-item precedent-item">
             <div class="result-head">
@@ -225,11 +242,67 @@
             </div>
             <div class="tag-list">${articles.map((article) => `<span>${escapeHtml(article)}</span>`).join("")}</div>
             <p>${escapeHtml(excerpt || "Фрагмент пока не извлечен.")}</p>
-            <div class="result-actions">${source}</div>
+            <div class="result-actions">${detailButton}${source}</div>
           </article>
         `;
       })
       .join("");
+  }
+
+  async function openDecision(decisionId) {
+    if (!decisionDialog || !decisionDetail || !decisionDialogTitle) return;
+
+    decisionDialogTitle.textContent = "Загрузка решения...";
+    decisionDetail.innerHTML = '<p class="empty-state">Получаем полный текст решения.</p>';
+    showDialog(decisionDialog);
+
+    try {
+      const decision = await loadDecisionDetail(decisionId);
+      renderDecisionDetail(normalizeDecision(decision));
+    } catch (error) {
+      decisionDialogTitle.textContent = "Решение недоступно";
+      decisionDetail.innerHTML = `<p class="empty-state">${escapeHtml(error.message || "Не удалось открыть решение.")}</p>`;
+    }
+  }
+
+  async function loadDecisionDetail(decisionId) {
+    if (apiBase) {
+      return fetchJson(`${apiBase}/api/decisions/${encodeURIComponent(decisionId)}`);
+    }
+
+    const local = decisions.find((item) => String(item.decision_id || "") === String(decisionId));
+    if (!local) throw new Error("Решение не найдено в локальном sample.");
+    return local;
+  }
+
+  function renderDecisionDetail(decision) {
+    const title = decision.case_number || decision.decision_id || "Решение";
+    const articles = [...(decision.cited_article_keys || []), ...(decision.cited_articles || [])].slice(0, 10);
+    const source = decision.source_url
+      ? `<a href="${escapeAttribute(decision.source_url)}" target="_blank" rel="noreferrer">Открыть официальный источник</a>`
+      : '<span>Официальная ссылка отсутствует</span>';
+
+    decisionDialogTitle.textContent = title;
+    decisionDetail.innerHTML = `
+      <div class="case-meta">
+        <span>${escapeHtml(decision.court_name || "Суд не указан")}</span>
+        <span>${escapeHtml([decision.court_region, decision.court_level, decision.decision_type].filter(Boolean).join(" · "))}</span>
+        <span>${escapeHtml(decision.decision_date || "дата не указана")}</span>
+        <span>${escapeHtml(formatOutcome(decision.outcome_label))}</span>
+      </div>
+      <div class="tag-list">${articles.map((article) => `<span>${escapeHtml(article)}</span>`).join("")}</div>
+      <div class="result-actions">${source}</div>
+      <div class="decision-text">${escapeHtml(decision.text || "Полный текст недоступен. Проверьте официальный источник.")}</div>
+      <div class="disclaimer"><strong>Важно.</strong> Используйте этот текст как рабочую копию и проверяйте по официальному источнику.</div>
+    `;
+  }
+
+  function showDialog(dialog) {
+    if (typeof dialog.showModal === "function") {
+      dialog.showModal();
+      return;
+    }
+    dialog.setAttribute("open", "");
   }
 
   function countBy(items, key) {
