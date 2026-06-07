@@ -33,8 +33,18 @@ test("search API returns filtered practice analytics", async () => {
   });
 });
 
-async function withServer(callback) {
-  const server = createSearchApiServer(sample, { source: "test" });
+test("search API can serve static prototype files in dev mode", async () => {
+  await withServer(async (baseUrl) => {
+    const html = await getText(`${baseUrl}/precedent-search.html`);
+    const script = await getText(`${baseUrl}/assets/precedent-search.js`);
+
+    assert.match(html, /Поиск судебной практики/);
+    assert.match(script, /renderFromApi/);
+  }, { staticRoot: process.cwd() });
+});
+
+async function withServer(callback, options = {}) {
+  const server = createSearchApiServer(sample, { source: "test", ...options });
   await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
   const address = server.address();
   const baseUrl = `http://127.0.0.1:${address.port}`;
@@ -52,4 +62,10 @@ async function getJson(url) {
   const response = await fetch(url);
   assert.equal(response.ok, true);
   return response.json();
+}
+
+async function getText(url) {
+  const response = await fetch(url);
+  assert.equal(response.ok, true);
+  return response.text();
 }

@@ -125,9 +125,12 @@ Shared search helpers live in `scripts/search-utils.mjs`. CLI search and filtere
 Run a local JSON API over the synthetic sample or an ignored local index:
 
 ```bash
+npm run dev
 node scripts/serve-search-api.mjs --port 8787
 node scripts/serve-search-api.mjs --input data/index/edrsr-2026.sample.text.jsonl --port 8787
 ```
+
+`npm run dev` serves both static pages and the API at `http://127.0.0.1:8787`, so `http://127.0.0.1:8787/precedent-search.html` uses the same server for UI and data.
 
 Useful endpoints:
 

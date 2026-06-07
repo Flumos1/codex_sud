@@ -12,19 +12,21 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = parseArgs(process.argv.slice(2));
   const inputPath = path.resolve(args.input || samplePath);
   const port = Number.parseInt(args.port || "8787", 10);
+  const staticRoot = args.static ? path.resolve(args.static === true ? "." : args.static) : "";
   const decisions = await loadJsonl(inputPath);
-  const server = createSearchApiServer(decisions, { source: inputPath });
+  const server = createSearchApiServer(decisions, { source: inputPath, staticRoot });
 
   server.listen(port, () => {
     const address = server.address();
     const actualPort = typeof address === "object" && address ? address.port : port;
     console.log(`Search API listening on http://127.0.0.1:${actualPort}`);
+    if (staticRoot) console.log(`Static files: ${staticRoot}`);
     console.log(`Source: ${inputPath}`);
   });
 }
 
 export function createSearchApiServer(decisions, options = {}) {
-  return createServer((request, response) => {
+  return createServer(async (request, response) => {
     try {
       const url = new URL(request.url || "/", "http://127.0.0.1");
 
@@ -67,6 +69,11 @@ export function createSearchApiServer(decisions, options = {}) {
         return;
       }
 
+      if (options.staticRoot) {
+        await sendStatic(response, options.staticRoot, url.pathname);
+        return;
+      }
+
       sendJson(response, 404, { error: "not_found" });
     } catch (error) {
       sendJson(response, 500, { error: "internal_error", message: error.message });
@@ -81,6 +88,45 @@ export async function loadJsonl(filePath) {
     .map((line) => line.trim())
     .filter(Boolean)
     .map((line) => JSON.parse(line));
+}
+
+async function sendStatic(response, rootDir, pathname) {
+  const relativePath = decodeURIComponent(pathname === "/" ? "/index.html" : pathname);
+  const filePath = path.resolve(rootDir, `.${relativePath}`);
+  const rootWithSeparator = rootDir.endsWith(path.sep) ? rootDir : `${rootDir}${path.sep}`;
+
+  if (filePath !== rootDir && !filePath.startsWith(rootWithSeparator)) {
+    sendJson(response, 403, { error: "forbidden" });
+    return;
+  }
+
+  try {
+    const body = await readFile(filePath);
+    response.writeHead(200, {
+      "Content-Type": contentType(filePath),
+    });
+    response.end(body);
+  } catch (error) {
+    if (error.code === "ENOENT" || error.code === "EISDIR") {
+      sendJson(response, 404, { error: "not_found" });
+      return;
+    }
+    throw error;
+  }
+}
+
+function contentType(filePath) {
+  const extension = path.extname(filePath).toLocaleLowerCase("en-US");
+  const types = {
+    ".css": "text/css; charset=utf-8",
+    ".html": "text/html; charset=utf-8",
+    ".js": "text/javascript; charset=utf-8",
+    ".json": "application/json; charset=utf-8",
+    ".jsonl": "application/x-ndjson; charset=utf-8",
+    ".md": "text/markdown; charset=utf-8",
+    ".svg": "image/svg+xml",
+  };
+  return types[extension] || "application/octet-stream";
 }
 
 function queryFromSearchParams(params) {
