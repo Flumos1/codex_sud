@@ -73,6 +73,18 @@ export function createSearchApiServer(decisions, options = {}) {
         return;
       }
 
+      const decisionMatch = url.pathname.match(/^\/api\/decisions\/([^/]+)$/u);
+      if (decisionMatch) {
+        const decisionId = decodeURIComponent(decisionMatch[1]);
+        const decision = decisions.find((item) => String(item.decision_id || "") === decisionId);
+        if (!decision) {
+          sendJson(response, 404, { error: "decision_not_found", decision_id: decisionId });
+          return;
+        }
+        sendJson(response, 200, projectDecision(decision, { includeText: true }));
+        return;
+      }
+
       if (options.staticRoot) {
         await sendStatic(response, options.staticRoot, url.pathname);
         return;

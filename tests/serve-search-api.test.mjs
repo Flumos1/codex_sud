@@ -34,6 +34,27 @@ test("search API includes full text only when explicitly requested", async () =>
   });
 });
 
+test("search API returns a full decision by id", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/decisions/sample-005`);
+
+    assert.equal(payload.decision_id, "sample-005");
+    assert.equal(payload.case_number, "760/5005/26");
+    assert.match(payload.text, /Позов про стягнення боргу/);
+  });
+});
+
+test("search API returns 404 for missing decisions", async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/decisions/missing-id`);
+    const payload = await response.json();
+
+    assert.equal(response.status, 404);
+    assert.equal(payload.error, "decision_not_found");
+    assert.equal(payload.decision_id, "missing-id");
+  });
+});
+
 test("search API returns filtered practice analytics", async () => {
   await withServer(async (baseUrl) => {
     const payload = await getJson(`${baseUrl}/api/analyze?region=%D0%9A%D0%B8%D1%97%D0%B2`);
