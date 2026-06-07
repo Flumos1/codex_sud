@@ -25,6 +25,13 @@ Static pages:
 
 The repository contains a synthetic sample dataset only. It is not real court data.
 
+Run syntax checks and regression tests:
+
+```bash
+npm run check
+npm test
+```
+
 Run:
 
 ```bash

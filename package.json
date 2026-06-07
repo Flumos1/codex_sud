@@ -1,0 +1,10 @@
+{
+  "name": "codex-sud",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check scripts/legal-text-utils.mjs && node --check scripts/normalize-edrsr.mjs && node --check scripts/enrich-edrsr-text.mjs && node --check scripts/search-sample.mjs && node --check scripts/analyze-decisions.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
