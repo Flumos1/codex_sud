@@ -58,7 +58,7 @@ For the first 20 metadata rows:
 
 - text coverage: 17/20, or 85%;
 - article extraction coverage: 17/20, or 85%;
-- outcome coverage after conservative dispositive-part rules: 2/20, or 10%;
+- outcome coverage after conservative dispositive-part rules: 14/20, or 70%;
 - text status after local cached rerun: 17 `cached`, 3 `missing_url`;
 - date range: 2025-12-30 to 2025-12-31;
 - regions: `м. Київ` and `Житомирська область`;
@@ -81,6 +81,16 @@ The article/outcome search found 2 real decisions for:
 - outcome: `appeal_dismissed`.
 
 The local UI prototype at `precedent-search.html` can load `data/index/edrsr-2026.first20.text.jsonl` when served through a local HTTP server. The same filter found case numbers `320/5009/25` and `320/3913/24`.
+
+After adding procedural outcome rules, the same 20-row sample produced:
+
+- `cassation_refused_opening`: 7;
+- `appeal_dismissed`: 2;
+- `cassation_returned`: 2;
+- `case_scheduled`: 1;
+- `cassation_opened`: 1;
+- `transferred`: 1;
+- `unknown`: 6.
 
 ## Important Findings
 

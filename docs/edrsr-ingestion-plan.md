@@ -147,6 +147,11 @@ Start rule-based:
 - "задовольнити частково" -> `partially_satisfied`;
 - "апеляційну скаргу залишити без задоволення" -> `appeal_dismissed`;
 - "касаційну скаргу залишити без задоволення" -> `cassation_dismissed`;
+- "відмовити у відкритті касаційного провадження" -> `cassation_refused_opening`;
+- "відкрити касаційне провадження" -> `cassation_opened`;
+- "касаційну скаргу повернути" -> `cassation_returned`;
+- "призначити справу до розгляду" -> `case_scheduled`;
+- "у задоволенні заяви відмовити" -> `motion_denied`;
 - "рішення залишити без змін" -> `left_unchanged`;
 - "скасувати" -> `cancelled`;
 - "змінити" -> `changed`;

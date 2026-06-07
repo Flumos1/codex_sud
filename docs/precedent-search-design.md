@@ -108,6 +108,11 @@ Civil/commercial/admin examples:
 - decision left unchanged;
 - cassation granted;
 - cassation dismissed;
+- cassation opening refused;
+- cassation proceeding opened;
+- cassation complaint returned;
+- case scheduled for review;
+- motion denied;
 - remanded.
 
 Criminal examples:
