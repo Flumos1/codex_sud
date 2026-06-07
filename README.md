@@ -122,6 +122,19 @@ Shared legal text helpers live in `scripts/legal-text-utils.mjs`. Normalization,
 
 Shared search helpers live in `scripts/search-utils.mjs`. CLI search and filtered analytics use the same filters, sorting, limits, and search summaries, which is the intended base for a future API endpoint.
 
+Run a local JSON API over the synthetic sample or an ignored local index:
+
+```bash
+node scripts/serve-search-api.mjs --port 8787
+node scripts/serve-search-api.mjs --input data/index/edrsr-2026.sample.text.jsonl --port 8787
+```
+
+Useful endpoints:
+
+- `GET /health`
+- `GET /api/search?article=625%20%D0%A6%D0%9A&limit=10`
+- `GET /api/analyze?article=%D0%9A%D0%90%D0%A1%20%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B8%3A333`
+
 Analyze a normalized or text-enriched JSONL file:
 
 ```bash

@@ -9,7 +9,11 @@ const samplePath = path.join(root, "data", "sample", "edrsr-sample.jsonl");
 
 const args = parseArgs(process.argv.slice(2));
 const inputPath = args.input ? path.resolve(args.input) : samplePath;
+const outputJson = Boolean(args.json);
+const outputCsv = Boolean(args.csv);
 delete args.input;
+delete args.json;
+delete args.csv;
 
 const decisions = await loadJsonl(inputPath);
 const matchedResults = filterDecisions(decisions, args);
@@ -18,9 +22,9 @@ const results = limitResults(sortedResults, args.limit);
 const summary = summarizeSearchResults(matchedResults);
 const output = { query: args, summary, results };
 
-if (args.csv) {
+if (outputCsv) {
   process.stdout.write(toCsv(results));
-} else if (args.json) {
+} else if (outputJson) {
   process.stdout.write(JSON.stringify(output, null, 2));
 } else {
   printHuman(args, summary, results);
