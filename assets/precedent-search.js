@@ -96,6 +96,7 @@
     const onHttps = window.location.protocol === "https:";
     const candidates = [
       apiParam,
+      window.location.origin, // Same-origin API (Vercel serverless functions in production).
       `${window.location.protocol}//${window.location.hostname || "127.0.0.1"}:8787`,
       "http://127.0.0.1:8787",
     ]
@@ -106,7 +107,7 @@
 
     for (const candidate of [...new Set(candidates)]) {
       try {
-        const response = await fetch(`${candidate}/health`, {
+        const response = await fetch(`${candidate}/api/health`, {
           cache: "no-store",
           signal: timeoutSignal(HEALTH_TIMEOUT_MS),
         });
@@ -218,11 +219,13 @@
   function filterDecisions(items, data) {
     const query = queryFromFormData(data);
 
+    // Keep these rules in sync with the server-side filterDecisions in scripts/search-utils.mjs
+    // so the local JSONL fallback and the API return the same results for the same query.
     return items.filter((item) => {
       if (query.article && !matchesArticle(item, query.article)) return false;
-      if (query.q && !includesText([item.text, item.case_number, item.court_name, item.category].join(" "), query.q)) return false;
+      if (query.q && !includesText([item.text, item.case_number, item.court_name].join(" "), query.q)) return false;
       if (query.region && !includesText(item.court_region, query.region)) return false;
-      if (query.level && !includesText(item.court_level, query.level)) return false;
+      if (query.level && item.court_level !== query.level) return false;
       if (query.from && item.decision_date < query.from) return false;
       if (query.to && item.decision_date > query.to) return false;
       if (query.type && item.decision_type !== query.type) return false;

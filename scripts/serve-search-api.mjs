@@ -2,36 +2,18 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
-import { summarizePractice } from "./analytics-utils.mjs";
-import { parseArgs, readJsonl } from "./cli-utils.mjs";
 import {
-  buildRelevantExcerpts,
-  filterDecisions,
-  limitResults,
-  sortResults,
-  summarizeSearchResults,
-} from "./search-utils.mjs";
+  handleAnalyze,
+  handleDecision,
+  handleSearch,
+  indexById,
+  queryFromSearchParams,
+} from "./api-core.mjs";
+import { parseArgs, readJsonl } from "./cli-utils.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const samplePath = path.join(root, "data", "sample", "edrsr-sample.jsonl");
 
-const DEFAULT_LIMIT = 20;
-const MAX_LIMIT = 100;
-const KNOWN_FILTERS = new Set([
-  "article",
-  "law",
-  "region",
-  "court",
-  "level",
-  "type",
-  "outcome",
-  "from",
-  "to",
-  "q",
-  "sort",
-  "limit",
-  "include_text",
-]);
 const ALLOWED_STATIC_EXTENSIONS = new Set([".css", ".html", ".js", ".json", ".jsonl", ".md", ".svg"]);
 const DEFAULT_ALLOWED_ORIGINS = [
   "http://127.0.0.1:8787",
@@ -56,9 +38,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 
 export function createSearchApiServer(decisions, options = {}) {
-  const decisionsById = new Map(
-    decisions.map((decision) => [String(decision.decision_id || ""), decision]),
-  );
+  const decisionsById = indexById(decisions);
   const allowedOrigins = resolveAllowedOrigins(options.allowedOrigins);
 
   return createServer(async (request, response) => {
@@ -76,7 +56,7 @@ export function createSearchApiServer(decisions, options = {}) {
         return;
       }
 
-      if (url.pathname === "/health") {
+      if (url.pathname === "/health" || url.pathname === "/api/health") {
         sendJson(
           response,
           200,
@@ -92,47 +72,23 @@ export function createSearchApiServer(decisions, options = {}) {
 
       if (url.pathname === "/api/search") {
         const query = queryFromSearchParams(url.searchParams);
-        const limit = resolveLimit(query.limit);
-        if (limit === null) {
-          sendJson(response, 400, { error: "invalid_limit", max: MAX_LIMIT }, corsOrigin);
-          return;
-        }
-        const includeText = query.include_text === "1" || query.include_text === "true";
-        delete query.include_text;
-        const matchedResults = filterDecisions(decisions, query);
-        const sortedResults = sortResults(matchedResults, query.sort);
-        const results = limitResults(sortedResults, limit).map((decision) =>
-          projectDecision(decision, { includeText, query }),
-        );
-        sendJson(
-          response,
-          200,
-          {
-            query,
-            summary: summarizeSearchResults(matchedResults),
-            results,
-          },
-          corsOrigin,
-        );
+        const { status, payload } = handleSearch(decisions, query);
+        sendJson(response, status, payload, corsOrigin);
         return;
       }
 
       if (url.pathname === "/api/analyze") {
         const query = queryFromSearchParams(url.searchParams);
-        const filtered = filterDecisions(decisions, query);
-        sendJson(response, 200, summarizePractice(filtered, decisions.length, query), corsOrigin);
+        const { status, payload } = handleAnalyze(decisions, query);
+        sendJson(response, status, payload, corsOrigin);
         return;
       }
 
       const decisionMatch = url.pathname.match(/^\/api\/decisions\/([^/]+)$/u);
       if (decisionMatch) {
         const decisionId = decodeURIComponent(decisionMatch[1]);
-        const decision = decisionsById.get(decisionId);
-        if (!decision) {
-          sendJson(response, 404, { error: "decision_not_found", decision_id: decisionId }, corsOrigin);
-          return;
-        }
-        sendJson(response, 200, projectDecision(decision, { includeText: true }), corsOrigin);
+        const { status, payload } = handleDecision(decisionsById, decisionId);
+        sendJson(response, status, payload, corsOrigin);
         return;
       }
 
@@ -151,46 +107,6 @@ export function createSearchApiServer(decisions, options = {}) {
 
 export async function loadJsonl(filePath) {
   return readJsonl(filePath);
-}
-
-function resolveLimit(rawLimit) {
-  if (rawLimit === undefined) return DEFAULT_LIMIT;
-  const parsed = Number.parseInt(rawLimit, 10);
-  if (!Number.isFinite(parsed) || parsed < 1) return null;
-  return Math.min(parsed, MAX_LIMIT);
-}
-
-function projectDecision(decision, options = {}) {
-  const projected = {
-    decision_id: decision.decision_id,
-    source_url: decision.source_url,
-    source_dataset: decision.source_dataset,
-    source_attribution: decision.source_attribution,
-    case_number: decision.case_number,
-    proceeding_number: decision.proceeding_number,
-    court_name: decision.court_name,
-    court_region: decision.court_region,
-    court_level: decision.court_level,
-    court_code: decision.court_code,
-    decision_date: decision.decision_date,
-    registration_date: decision.registration_date,
-    publication_date: decision.publication_date,
-    proceeding_type: decision.proceeding_type,
-    decision_type: decision.decision_type,
-    category: decision.category,
-    judge_names: decision.judge_names,
-    cited_articles: decision.cited_articles || [],
-    cited_article_keys: decision.cited_article_keys || [],
-    cited_laws: decision.cited_laws || [],
-    outcome_label: decision.outcome_label,
-    outcome_confidence: decision.outcome_confidence,
-    key_excerpts: options.query ? buildRelevantExcerpts(decision, options.query) : decision.key_excerpts || [],
-    text_status: decision.text_status,
-    text_error: decision.text_error,
-  };
-
-  if (options.includeText) projected.text = decision.text || "";
-  return projected;
 }
 
 async function sendStatic(response, rootDir, pathname, corsOrigin) {
@@ -251,14 +167,6 @@ function contentType(filePath) {
     ".svg": "image/svg+xml",
   };
   return types[extension] || "application/octet-stream";
-}
-
-function queryFromSearchParams(params) {
-  const query = {};
-  for (const [key, value] of params.entries()) {
-    if (value && KNOWN_FILTERS.has(key)) query[key] = value;
-  }
-  return query;
 }
 
 function resolveAllowedOrigins(configured) {

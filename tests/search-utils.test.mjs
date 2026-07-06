@@ -22,6 +22,20 @@ test("filterDecisions applies practical legal search filters", () => {
   assert.equal(results[0].case_number, "202/4004/26");
 });
 
+test("level and type filters match the form vocabulary in the sample", () => {
+  const firstInstance = filterDecisions(sample, { level: "Перша інстанція" });
+  assert.equal(firstInstance.length, 4);
+
+  const appeal = filterDecisions(sample, { level: "Апеляційна інстанція" });
+  assert.deepEqual(
+    appeal.map((item) => item.case_number),
+    ["202/4004/26"],
+  );
+
+  const rulings = filterDecisions(sample, { type: "Рішення" });
+  assert.equal(rulings.length, 3);
+});
+
 test("sortResults and limitResults prepare compact review lists", () => {
   const matches = filterDecisions(sample, { article: "625 ЦК" });
   const sorted = sortResults(matches, "date_asc");
