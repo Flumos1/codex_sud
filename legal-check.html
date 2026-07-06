@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Legal check in 60 seconds | Legal OS Ukraine</title>
+    <meta name="description" content="Макет первого отчета юридической проверки по официальным источникам.">
+    <link rel="stylesheet" href="assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <a class="brand" href="index.html" aria-label="Legal OS Ukraine">
+        <span class="brand-mark">L</span>
+        <span>Legal OS Ukraine</span>
+      </a>
+      <nav class="nav" aria-label="Основная навигация">
+        <a href="precedent-search.html">Практика</a>
+        <a href="case-status.html">Стан справи</a>
+        <a href="registries.html">Реестры</a>
+        <a href="legal-check.html" aria-current="page">Legal check</a>
+        <a href="LEGAL_PLATFORM_ROADMAP.md">Roadmap</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page-head">
+        <p class="eyebrow">Legal check in 60 seconds</p>
+        <h1>Первый отчет проверки по официальным источникам</h1>
+        <p class="lead">
+          Макет раннего продукта для проверки компании, ФОП или участника сделки.
+          Отчет показывает только источник, дату проверки, найденный сигнал и уровень ручной верификации.
+        </p>
+      </section>
+
+      <section class="section split align-start">
+        <form class="panel form-panel" aria-label="Параметры проверки">
+          <p class="eyebrow">Запрос</p>
+          <h2>Кого проверяем</h2>
+          <label>
+            Компания, ФОП или контрагент
+            <input type="text" value="ТОВ Приклад Контракт" aria-label="Компания, ФОП или контрагент">
+          </label>
+          <div class="form-grid">
+            <label>
+              Код / ЄДРПОУ
+              <input type="text" value="00000000" aria-label="Код или ЄДРПОУ">
+            </label>
+            <label>
+              Цель проверки
+              <select aria-label="Цель проверки">
+                <option>Перед договором</option>
+                <option>Перед оплатой</option>
+                <option>Судебная подготовка</option>
+              </select>
+            </label>
+          </div>
+          <button class="button primary" type="button">Сформировать демо-отчет</button>
+          <p class="note">Демо-экран не отправляет данные и не выполняет live-поиск.</p>
+        </form>
+
+        <aside class="panel report-summary" aria-label="Сводка отчета">
+          <p class="eyebrow">Сводка</p>
+          <h2>Риск требует проверки юристом</h2>
+          <div class="risk-meter" aria-label="Уровень риска">
+            <span></span>
+          </div>
+          <div class="metric-grid compact">
+            <div>
+              <strong>5</strong>
+              <span>источников</span>
+            </div>
+            <div>
+              <strong>2</strong>
+              <span>сигнала</span>
+            </div>
+            <div>
+              <strong>3</strong>
+              <span>ручные проверки</span>
+            </div>
+          </div>
+          <p class="note">Отчет не является скорингом. Он помогает быстро открыть официальные источники и зафиксировать проверяемые факты.</p>
+        </aside>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Report</p>
+          <h2>Структура результата</h2>
+        </div>
+        <div class="report-layout">
+          <article class="report-block">
+            <div class="report-block-head">
+              <h3>Идентификация</h3>
+              <span class="badge research">open data</span>
+            </div>
+            <p>Официальный ЄДР: название, код, организационная форма, статус, адресная зона и дата набора данных.</p>
+            <ul class="source-list">
+              <li><a href="https://data.gov.ua/dataset/a1799820-195b-4982-8141-6e84f58103e7" target="_blank" rel="noreferrer">ЄДР юрлиц и ФОП</a><span>source date required</span></li>
+            </ul>
+          </article>
+
+          <article class="report-block">
+            <div class="report-block-head">
+              <h3>Судебная практика</h3>
+              <span class="badge research">researching</span>
+            </div>
+            <p>Связанные решения и похожая практика по найденным статьям. Для MVP показываем ссылки на официальный текст и не делаем прогноз результата.</p>
+            <ul class="source-list">
+              <li><a href="https://reyestr.court.gov.ua/" target="_blank" rel="noreferrer">ЄДРСР</a><span>official text link</span></li>
+            </ul>
+          </article>
+
+          <article class="report-block">
+            <div class="report-block-head">
+              <h3>Закупки</h3>
+              <span class="badge research">open API</span>
+            </div>
+            <p>История участия в публичных закупках, роли поставщика и официальные карточки тендеров.</p>
+            <ul class="source-list">
+              <li><a href="https://prozorro.gov.ua/openprocurement" target="_blank" rel="noreferrer">ProZorro</a><span>tender IDs</span></li>
+            </ul>
+          </article>
+
+          <article class="report-block">
+            <div class="report-block-head">
+              <h3>Профессиональные реестры</h3>
+              <span class="badge research">open data</span>
+            </div>
+            <p>Проверка судебного эксперта, арбитражного управляющего или нотариуса, если проверяемое лицо относится к этим ролям.</p>
+            <ul class="source-list">
+              <li><a href="https://data.gov.ua/dataset/0a556891-d6ef-4a5f-a182-caac2f7aa9c9" target="_blank" rel="noreferrer">Реестр судебных экспертов</a><span>professional profile</span></li>
+            </ul>
+          </article>
+
+          <article class="report-block needs-review">
+            <div class="report-block-head">
+              <h3>Долги, санкции, enforcement</h3>
+              <span class="badge risk">needs review</span>
+            </div>
+            <p>Эти сигналы чувствительные. В первом продукте показываем официальный линк и ручной статус, пока не подтверждены условия автоматизации и хранения.</p>
+            <ul class="source-list">
+              <li><a href="https://erb.minjust.gov.ua/" target="_blank" rel="noreferrer">Єдиний реєстр боржників</a><span>manual/legal review</span></li>
+              <li><a href="https://drs.nsdc.gov.ua/" target="_blank" rel="noreferrer">Державний реєстр санкцій</a><span>match verification</span></li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section split">
+        <div>
+          <p class="eyebrow">Вывод</p>
+          <h2>Что пользователь получает за минуту</h2>
+          <p>
+            Не окончательное заключение, а рабочую карту: где проверено автоматически по open data,
+            где нужна ручная проверка, какие официальные ссылки открыть и какие факты показать юристу.
+          </p>
+        </div>
+        <div class="rule-list compact">
+          <div>Каждый сигнал имеет официальный источник</div>
+          <div>Каждая дата проверки видна в отчете</div>
+          <div>Чувствительные данные не копируются без цели</div>
+          <div>AI-комментарий отделен от фактов</div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="disclaimer">
+          <strong>Важно.</strong>
+          Демо-отчет не является юридической консультацией, не заменяет проверку официального источника
+          и не должен использоваться как автоматический отказ от сделки.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Legal OS Ukraine</span>
+      <span>Проверки строятся на официальных источниках и законном доступе.</span>
+    </footer>
+  </body>
+</html>

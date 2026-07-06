@@ -3,7 +3,13 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { summarizePractice } from "./analytics-utils.mjs";
-import { filterDecisions, limitResults, sortResults, summarizeSearchResults } from "./search-utils.mjs";
+import {
+  buildRelevantExcerpts,
+  filterDecisions,
+  limitResults,
+  sortResults,
+  summarizeSearchResults,
+} from "./search-utils.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const samplePath = path.join(root, "data", "sample", "edrsr-sample.jsonl");
@@ -56,7 +62,7 @@ export function createSearchApiServer(decisions, options = {}) {
         const matchedResults = filterDecisions(decisions, query);
         const sortedResults = sortResults(matchedResults, query.sort);
         const results = limitResults(sortedResults, query.limit || 20).map((decision) =>
-          projectDecision(decision, { includeText }),
+          projectDecision(decision, { includeText, query }),
         );
         sendJson(response, 200, {
           query,
@@ -130,7 +136,7 @@ function projectDecision(decision, options = {}) {
     cited_laws: decision.cited_laws || [],
     outcome_label: decision.outcome_label,
     outcome_confidence: decision.outcome_confidence,
-    key_excerpts: decision.key_excerpts || [],
+    key_excerpts: options.query ? buildRelevantExcerpts(decision, options.query) : decision.key_excerpts || [],
     text_status: decision.text_status,
     text_error: decision.text_error,
   };

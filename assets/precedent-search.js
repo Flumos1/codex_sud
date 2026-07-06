@@ -6,6 +6,7 @@
   const metrics = document.querySelector("#practiceMetrics");
   const facets = document.querySelector("#practiceFacets");
   const results = document.querySelector("#precedentResults");
+  const reviewSets = document.querySelector("#practiceReviewSets");
   const sourceNote = document.querySelector("#dataSourceNote");
   const decisionDialog = document.querySelector("#decisionDialog");
   const decisionDialogTitle = document.querySelector("#decisionDialogTitle");
@@ -15,7 +16,7 @@
   let activeSource = "";
   let apiBase = "";
 
-  if (!form || !metrics || !facets || !results) return;
+  if (!form || !metrics || !facets || !results || !reviewSets) return;
 
   initialize();
 
@@ -85,6 +86,7 @@
 
     renderMetricsFromAnalysis(analysisPayload);
     renderFacetsFromAnalysis(analysisPayload);
+    renderReviewSets(analysisPayload.review_sets || {});
     renderResults((searchPayload.results || []).map(normalizeDecision));
   }
 
@@ -163,6 +165,7 @@
   function renderLocal(items) {
     renderMetrics(items);
     renderFacets(items);
+    renderReviewSets(buildReviewSets(items));
     renderResults(items.slice(0, 20));
   }
 
@@ -247,6 +250,96 @@
         `;
       })
       .join("");
+  }
+
+  function renderReviewSets(sets) {
+    const groups = [
+      ["supporting_outcome", "Поддерживающие исходы"],
+      ["opposing_outcome", "Противоположная практика"],
+      ["procedural_turn", "Процедурные повороты"],
+      ["needs_manual_review", "Нужно проверить вручную"],
+    ];
+
+    reviewSets.innerHTML = groups
+      .map(([key, title]) => {
+        const rows = sets[key] || [];
+        if (!rows.length) {
+          return `
+            <article class="review-column">
+              <h3>${title}</h3>
+              <p class="empty-state">нет решений</p>
+            </article>
+          `;
+        }
+
+        return `
+          <article class="review-column">
+            <h3>${title}</h3>
+            ${rows
+              .slice(0, 5)
+              .map(
+                (item) => `
+                  <div class="review-item">
+                    <strong>${escapeHtml(item.case_number || item.decision_id || "Без номера")}</strong>
+                    <span>${escapeHtml([item.court_name, item.decision_date].filter(Boolean).join(" · "))}</span>
+                    <span>${escapeHtml(formatOutcome(item.outcome_label))}</span>
+                  </div>
+                `,
+              )
+              .join("")}
+          </article>
+        `;
+      })
+      .join("");
+  }
+
+  function buildReviewSets(items) {
+    const sets = {
+      supporting_outcome: [],
+      opposing_outcome: [],
+      procedural_turn: [],
+      needs_manual_review: [],
+    };
+
+    for (const item of [...items].sort(compareForReview)) {
+      const group = outcomeGroup(item);
+      if (sets[group].length >= 5) continue;
+      sets[group].push(item);
+    }
+
+    return sets;
+  }
+
+  function compareForReview(a, b) {
+    return (
+      Number(b.outcome_confidence || 0) - Number(a.outcome_confidence || 0) ||
+      clean(b.decision_date).localeCompare(clean(a.decision_date)) ||
+      clean(a.case_number).localeCompare(clean(b.case_number), "uk")
+    );
+  }
+
+  function outcomeGroup(item) {
+    const label = clean(item.outcome_label);
+    const confidence = Number(item.outcome_confidence || 0);
+    if (!label || label === "unknown" || confidence < 0.65) return "needs_manual_review";
+    if (["satisfied", "partially_satisfied", "appeal_granted", "cassation_granted", "left_unchanged"].includes(label)) {
+      return "supporting_outcome";
+    }
+    if (
+      ["dismissed", "appeal_dismissed", "cassation_dismissed", "cassation_refused_opening", "motion_denied", "closed"].includes(
+        label,
+      )
+    ) {
+      return "opposing_outcome";
+    }
+    if (
+      ["cancelled", "changed", "remanded", "case_scheduled", "cassation_opened", "cassation_returned", "transferred"].includes(
+        label,
+      )
+    ) {
+      return "procedural_turn";
+    }
+    return "needs_manual_review";
   }
 
   async function openDecision(decisionId) {

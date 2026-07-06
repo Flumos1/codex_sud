@@ -60,6 +60,8 @@ function printHuman(summary) {
   printSection("Top normalized article keys", summary.top_article_keys);
   printSection("Top articles", summary.top_articles);
   printSection("Top courts", summary.top_courts);
+  printSection("Outcome groups", summary.outcome_groups);
+  printReviewSets(summary.review_sets);
   printPivot("Outcome by year", summary.outcome_by_year);
   printPivot("Outcome by region", summary.outcome_by_region);
 }
@@ -85,6 +87,18 @@ function printPivot(title, rows) {
   }
   for (const row of rows.slice(0, 10)) {
     console.log(`- ${row.value}: ${row.total} ${JSON.stringify(row.counts)}`);
+  }
+}
+
+function printReviewSets(reviewSets) {
+  console.log("");
+  console.log("Review sets:");
+  for (const [group, rows] of Object.entries(reviewSets || {})) {
+    console.log(`- ${group}: ${rows.length}`);
+    for (const row of rows.slice(0, 3)) {
+      const title = [row.case_number, row.court_name, row.decision_date].filter(Boolean).join(" | ");
+      console.log(`  - ${title || row.decision_id || "unknown decision"}`);
+    }
   }
 }
 

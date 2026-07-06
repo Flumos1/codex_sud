@@ -10,6 +10,7 @@ Static pages:
 - `precedent-search.html` - precedent/case-law search prototype with local JSONL loading.
 - `case-status.html` - user-driven case status flow for `court.gov.ua/fair/`.
 - `registries.html` - registry intelligence catalog concept.
+- `legal-check.html` - first report layout for official-source legal checks.
 
 ## Project Memory
 

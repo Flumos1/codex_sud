@@ -1,0 +1,12 @@
+# Local tooling and raw data must never reach the deployment
+Claude_sud/
+data/raw/
+data/index/
+node_modules/
+
+# Pipeline sources, tests and internal docs are not part of the static site
+scripts/
+tests/
+readme_2026.pdf
+readme_2026_extracted.txt
+AGENTS.md

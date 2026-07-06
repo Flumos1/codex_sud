@@ -51,3 +51,23 @@ test("analysis CLI reports outcome pivots for filtered practice", async () => {
     },
   ]);
 });
+
+test("analysis CLI groups decisions into practical review sets", async () => {
+  const { stdout } = await execFileAsync("node", [
+    "scripts/analyze-decisions.mjs",
+    "--input",
+    "data/sample/edrsr-sample.jsonl",
+    "--json",
+  ]);
+
+  const summary = JSON.parse(stdout);
+
+  assert.deepEqual(Object.fromEntries(summary.outcome_groups.map((row) => [row.value, row.count])), {
+    opposing_outcome: 2,
+    supporting_outcome: 2,
+    procedural_turn: 1,
+  });
+  assert.equal(summary.review_sets.supporting_outcome.length, 2);
+  assert.equal(summary.review_sets.opposing_outcome.length, 2);
+  assert.equal(summary.review_sets.procedural_turn[0].case_number, "202/4004/26");
+});

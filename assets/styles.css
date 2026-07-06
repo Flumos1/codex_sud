@@ -410,6 +410,10 @@ select:focus {
   margin: 18px 0;
 }
 
+.metric-grid.compact {
+  grid-template-columns: repeat(3, minmax(72px, 1fr));
+}
+
 .metric-grid div {
   background: var(--surface-2);
   padding: 14px;
@@ -505,6 +509,41 @@ select:focus {
   font-weight: 700;
 }
 
+.review-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.review-column {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+}
+
+.review-column h3 {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.review-item {
+  background: var(--surface-2);
+  display: grid;
+  gap: 3px;
+  padding: 10px;
+}
+
+.review-item strong {
+  font-size: 14px;
+}
+
+.review-item span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .link-button {
   background: transparent;
   border: 0;
@@ -582,6 +621,81 @@ select:focus {
   padding: 18px 20px;
 }
 
+.report-summary {
+  align-self: stretch;
+}
+
+.risk-meter {
+  background: linear-gradient(90deg, #dff4e9 0 38%, #fff1d2 38% 72%, #fde3e3 72% 100%);
+  border: 1px solid var(--line);
+  height: 14px;
+  margin: 14px 0 4px;
+  position: relative;
+}
+
+.risk-meter span {
+  background: var(--text);
+  display: block;
+  height: 24px;
+  left: 63%;
+  position: absolute;
+  top: -6px;
+  width: 4px;
+}
+
+.report-layout {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.report-block {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+}
+
+.report-block.needs-review {
+  border-color: #ecd28b;
+  grid-column: 1 / -1;
+}
+
+.report-block-head {
+  align-items: start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.report-block-head h3 {
+  margin-bottom: 0;
+}
+
+.source-list {
+  display: grid;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.source-list li {
+  align-items: center;
+  background: var(--surface-2);
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 12px;
+}
+
+.source-list span {
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .footer {
   align-items: center;
   border-top: 1px solid var(--line);
@@ -600,8 +714,20 @@ select:focus {
   .form-grid,
   .metric-grid,
   .grid.two,
-  .grid.three {
+  .grid.three,
+  .review-grid,
+  .report-layout {
     grid-template-columns: 1fr;
+  }
+
+  .report-block.needs-review {
+    grid-column: auto;
+  }
+
+  .source-list li,
+  .report-block-head {
+    align-items: start;
+    display: grid;
   }
 
   .site-header {
