@@ -1,7 +1,13 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { filterDecisions, limitResults, sortResults, summarizeSearchResults } from "../scripts/search-utils.mjs";
+import {
+  buildRelevantExcerpts,
+  filterDecisions,
+  limitResults,
+  sortResults,
+  summarizeSearchResults,
+} from "../scripts/search-utils.mjs";
 
 const sample = await loadJsonl("data/sample/edrsr-sample.jsonl");
 
@@ -14,6 +20,20 @@ test("filterDecisions applies practical legal search filters", () => {
 
   assert.equal(results.length, 1);
   assert.equal(results[0].case_number, "202/4004/26");
+});
+
+test("level and type filters match the form vocabulary in the sample", () => {
+  const firstInstance = filterDecisions(sample, { level: "Перша інстанція" });
+  assert.equal(firstInstance.length, 4);
+
+  const appeal = filterDecisions(sample, { level: "Апеляційна інстанція" });
+  assert.deepEqual(
+    appeal.map((item) => item.case_number),
+    ["202/4004/26"],
+  );
+
+  const rulings = filterDecisions(sample, { type: "Рішення" });
+  assert.equal(rulings.length, 3);
 });
 
 test("sortResults and limitResults prepare compact review lists", () => {
@@ -39,6 +59,14 @@ test("summarizeSearchResults counts normalized article keys", () => {
     "ЦК України:625": 2,
     "ЦК України:23": 1,
   });
+});
+
+test("buildRelevantExcerpts prefers query text before stored generic excerpts", () => {
+  const [decision] = filterDecisions(sample, { article: "625 ЦК", q: "грошового зобов'язання" });
+  const excerpts = buildRelevantExcerpts(decision, { article: "625 ЦК", q: "грошового зобов'язання" });
+
+  assert.match(excerpts[0], /грошового зобов'язання/);
+  assert.match(excerpts.join(" "), /ст\. 625 ЦК України/);
 });
 
 async function loadJsonl(filePath) {

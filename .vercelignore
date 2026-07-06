@@ -1,0 +1,12 @@
+# Local tooling and raw data must never reach the deployment
+Claude_sud/
+data/raw/
+data/index/
+node_modules/
+
+# Tests, internal docs and heavy source readmes are not needed at runtime.
+# NOTE: scripts/ IS deployed — the serverless functions in api/ import from it.
+tests/
+readme_2026.pdf
+readme_2026_extracted.txt
+AGENTS.md

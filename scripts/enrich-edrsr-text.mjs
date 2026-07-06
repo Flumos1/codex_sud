@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { TextDecoder } from "node:util";
+import { parseArgs, readJsonl } from "./cli-utils.mjs";
 import { classifyOutcome, clean, extractArticles, unique } from "./legal-text-utils.mjs";
 
 const args = parseArgs(process.argv.slice(2));
@@ -15,7 +16,7 @@ if (!args.input || !args.output) {
   const limit = args.limit ? Number.parseInt(args.limit, 10) : undefined;
   const delayMs = args["delay-ms"] ? Number.parseInt(args["delay-ms"], 10) : 250;
   const offline = Boolean(args.offline);
-  const input = await loadJsonl(inputPath, { limit });
+  const input = await readJsonl(inputPath, { limit });
   const output = [];
 
   await mkdir(path.dirname(outputPath), { recursive: true });
@@ -53,15 +54,6 @@ if (!args.input || !args.output) {
   console.log(`Input: ${inputPath}`);
   console.log(`Output: ${outputPath}`);
   console.log(`RTF cache: ${cacheDir}`);
-}
-
-async function loadJsonl(filePath, options = {}) {
-  const text = await readFile(filePath, "utf8");
-  const lines = text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-  return lines.slice(0, options.limit || lines.length).map((line) => JSON.parse(line));
 }
 
 async function loadRtf(url, cachePath, options) {
@@ -187,23 +179,6 @@ function safeFileName(value) {
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function parseArgs(raw) {
-  const parsed = {};
-  for (let index = 0; index < raw.length; index += 1) {
-    const token = raw[index];
-    if (!token.startsWith("--")) continue;
-    const key = token.slice(2);
-    const next = raw[index + 1];
-    if (!next || next.startsWith("--")) {
-      parsed[key] = true;
-    } else {
-      parsed[key] = next;
-      index += 1;
-    }
-  }
-  return parsed;
 }
 
 function printUsage() {

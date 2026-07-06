@@ -34,6 +34,20 @@ test("search API includes full text only when explicitly requested", async () =>
   });
 });
 
+test("search API returns query-relevant excerpts for decision cards", async () => {
+  await withServer(async (baseUrl) => {
+    const query = new URLSearchParams({
+      article: "625 ЦК",
+      q: "грошового зобов'язання",
+      limit: "1",
+    });
+    const payload = await getJson(`${baseUrl}/api/search?${query}`);
+
+    assert.equal(payload.results.length, 1);
+    assert.match(payload.results[0].key_excerpts[0], /грошового зобов'язання/);
+  });
+});
+
 test("search API returns a full decision by id", async () => {
   await withServer(async (baseUrl) => {
     const payload = await getJson(`${baseUrl}/api/decisions/sample-005`);
@@ -62,16 +76,60 @@ test("search API returns filtered practice analytics", async () => {
     assert.equal(payload.total, 2);
     assert.equal(payload.source_total, 5);
     assert.deepEqual(payload.by_year, [{ value: "2026", count: 2 }]);
+    assert.deepEqual(payload.outcome_groups, [{ value: "supporting_outcome", count: 2 }]);
+    assert.equal(payload.review_sets.supporting_outcome.length, 2);
   });
+});
+
+test("search API rejects invalid limit values", async () => {
+  await withServer(async (baseUrl) => {
+    for (const badLimit of ["0", "-3", "abc"]) {
+      const response = await fetch(`${baseUrl}/api/search?limit=${badLimit}`);
+      const payload = await response.json();
+      assert.equal(response.status, 400);
+      assert.equal(payload.error, "invalid_limit");
+    }
+  });
+});
+
+test("search API caps limit at the maximum instead of dumping everything", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/search?limit=100000`);
+    // Sample has 5 decisions; an over-max limit must be accepted (not 400) and simply return what exists.
+    assert.equal(payload.results.length, 5);
+  });
+});
+
+test("search API ignores unknown query parameters", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/search?evil=%3Cscript%3E&limit=5`);
+    assert.equal("evil" in payload.query, false);
+  });
+});
+
+test("static dev mode blocks dot-files, raw data and disallowed extensions", async () => {
+  await withServer(
+    async (baseUrl) => {
+      for (const blockedPath of ["/.gitignore", "/data/raw/edrsr_2026/documents.csv", "/package.json.bak"]) {
+        const response = await fetch(`${baseUrl}${blockedPath}`);
+        assert.equal(response.status === 403 || response.status === 404, true, `expected block for ${blockedPath}`);
+      }
+      const gitConfig = await fetch(`${baseUrl}/.git/config`);
+      assert.equal(gitConfig.status, 403);
+    },
+    { staticRoot: process.cwd() },
+  );
 });
 
 test("search API can serve static prototype files in dev mode", async () => {
   await withServer(async (baseUrl) => {
     const html = await getText(`${baseUrl}/precedent-search.html`);
     const script = await getText(`${baseUrl}/assets/precedent-search.js`);
+    const legalCheck = await getText(`${baseUrl}/legal-check.html`);
 
     assert.match(html, /Поиск судебной практики/);
     assert.match(script, /renderFromApi/);
+    assert.match(legalCheck, /Legal check in 60 seconds/);
   }, { staticRoot: process.cwd() });
 });
 

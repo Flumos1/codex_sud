@@ -14,3 +14,7 @@ readme_2026_extracted.txt
 node_modules/
 dist/
 build/
+
+# Local portable tooling (bundled Node.js), never commit
+Claude_sud/
+

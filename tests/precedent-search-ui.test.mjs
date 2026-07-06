@@ -17,6 +17,11 @@ test("precedent search UI uses the local API when available", async () => {
     const context = {
       FormData: MockFormData,
       URLSearchParams,
+      URL,
+      AbortController,
+      AbortSignal,
+      setTimeout,
+      clearTimeout,
       console,
       document: {
         querySelector(selector) {
@@ -39,6 +44,7 @@ test("precedent search UI uses the local API when available", async () => {
 
     assert.match(elements["#dataSourceNote"].textContent, /Search API/);
     assert.match(elements["#practiceMetrics"].innerHTML, /<strong>5<\/strong>/);
+    assert.match(elements["#practiceReviewSets"].innerHTML, /Поддерживающие исходы/);
     assert.match(elements["#precedentResults"].innerHTML, /760\/5005\/26/);
 
     await elements["#precedentResults"].dispatch("click", {
@@ -71,6 +77,7 @@ function createElements() {
     "#decisionDetail": createElement(),
     "#practiceMetrics": createElement(),
     "#practiceFacets": createElement(),
+    "#practiceReviewSets": createElement(),
     "#precedentResults": createElement(),
     "#dataSourceNote": createElement(),
   };
@@ -91,7 +98,8 @@ function createElement() {
 }
 
 function createDialogElement() {
-  return {
+  const element = createElement();
+  return Object.assign(element, {
     open: false,
     close() {
       this.open = false;
@@ -99,7 +107,7 @@ function createDialogElement() {
     showModal() {
       this.open = true;
     },
-  };
+  });
 }
 
 class MockFormData {

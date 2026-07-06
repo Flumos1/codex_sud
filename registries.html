@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="uk">
+<html lang="ru">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,7 +17,7 @@
         <a href="precedent-search.html">Практика</a>
         <a href="case-status.html">Стан справи</a>
         <a href="registries.html" aria-current="page">Реестры</a>
-        <a href="LEGAL_PLATFORM_ROADMAP.md">Roadmap</a>
+        <a href="legal-check.html">Legal check</a>
       </nav>
     </header>
 
@@ -26,12 +26,41 @@
         <p class="eyebrow">Registry Intelligence</p>
         <h1>Государственные реестры и проверки</h1>
         <p class="lead">
-          Начинаем с безопасного каталога официальных источников. Автоматизацию добавляем только там,
+          Полезный каталог официальных источников для проверки компании, ФОП, судебных дел,
+          закупок, санкций, лицензий и профессиональных реестров. Автоматизацию добавляем только там,
           где это разрешено условиями источника, API или режимом открытых данных.
         </p>
       </section>
 
       <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Первый безопасный набор</p>
+          <h2>Что можно превратить в ранний продукт</h2>
+        </div>
+        <div class="grid three">
+          <article class="card">
+            <h3>Компания / ФОП</h3>
+            <p>Профиль из официального ЄДР: название, статус, код, регистрационные признаки и дата источника.</p>
+            <span class="badge research">open data</span>
+          </article>
+          <article class="card">
+            <h3>Судебная практика</h3>
+            <p>Поиск решений ЄДРСР по статье, региону, суду, дате и результату с ссылкой на официальный текст.</p>
+            <span class="badge research">researching</span>
+          </article>
+          <article class="card">
+            <h3>Закупки</h3>
+            <p>История участия в ProZorro, тендерные связи и официальные карточки закупок.</p>
+            <span class="badge research">open API</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-heading">
+          <p class="eyebrow">Каталог</p>
+          <h2>Официальные источники для проверки</h2>
+        </div>
         <div class="table-wrap">
           <table>
             <thead>
@@ -46,35 +75,103 @@
               <tr>
                 <td><a href="https://court.gov.ua/fair/" target="_blank" rel="noreferrer">Стан розгляду справ</a></td>
                 <td>Статус и стадии рассмотрения судебных дел</td>
-                <td>Ручной официальный поиск</td>
+                <td>Ручной официальный поиск, без обхода reCAPTCHA</td>
                 <td><span class="badge caution">manual-link-only</span></td>
               </tr>
               <tr>
                 <td><a href="https://reyestr.court.gov.ua/" target="_blank" rel="noreferrer">ЄДРСР</a></td>
-                <td>Судебные решения</td>
-                <td>Открытые данные и ссылки на оригинал</td>
+                <td>Судебные решения и практика по нормам права</td>
+                <td>Открытые наборы данных и ссылки на оригинал</td>
                 <td><span class="badge research">researching</span></td>
               </tr>
               <tr>
-                <td>ЄДР юрлиц и ФОП</td>
+                <td><a href="https://data.gov.ua/dataset/a1799820-195b-4982-8141-6e84f58103e7" target="_blank" rel="noreferrer">ЄДР юрлиц и ФОП</a></td>
                 <td>Компания, ФОП, регистрационные данные</td>
-                <td>Официальный источник/API после проверки</td>
-                <td><span class="badge">candidate</span></td>
+                <td>Официальный open-data dataset с атрибуцией</td>
+                <td><span class="badge research">safe-open-data</span></td>
               </tr>
               <tr>
-                <td>Єдиний реєстр боржників</td>
+                <td><a href="https://erb.minjust.gov.ua/" target="_blank" rel="noreferrer">Єдиний реєстр боржників</a></td>
                 <td>Долги и исполнительные риски</td>
-                <td>Требует правовой проверки</td>
+                <td>Только после правовой проверки условий и хранения</td>
                 <td><span class="badge risk">needs review</span></td>
               </tr>
               <tr>
-                <td>ProZorro</td>
+                <td><a href="https://asvpweb.minjust.gov.ua/" target="_blank" rel="noreferrer">АСВП</a></td>
+                <td>Исполнительные производства</td>
+                <td>Ручная проверка по известным данным/идентификаторам</td>
+                <td><span class="badge caution">manual-link-only</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://prozorro.gov.ua/openprocurement" target="_blank" rel="noreferrer">ProZorro</a></td>
                 <td>Публичные закупки и участие компаний</td>
-                <td>Открытые данные после проверки источника</td>
-                <td><span class="badge">candidate</span></td>
+                <td>Официальные открытые данные/API</td>
+                <td><span class="badge research">safe-open-data</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://prozorro.sale/opendata/" target="_blank" rel="noreferrer">ProZorro.Sale</a></td>
+                <td>Публичные продажи, аукционы, договоры</td>
+                <td>Официальные открытые данные</td>
+                <td><span class="badge research">safe-open-data</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://drs.nsdc.gov.ua/" target="_blank" rel="noreferrer">Державний реєстр санкцій</a></td>
+                <td>Санкционные совпадения по лицам, компаниям и активам</td>
+                <td>Официальная проверка с осторожным match confidence</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://tax.gov.ua/datasets.php" target="_blank" rel="noreferrer">ДПС open datasets</a></td>
+                <td>Налоговые публичные наборы, включая статусы плательщиков</td>
+                <td>Отдельная проверка по каждому набору</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://public.nazk.gov.ua/" target="_blank" rel="noreferrer">Реестр деклараций НАЗК</a></td>
+                <td>Декларации публичных должностных лиц</td>
+                <td>Только при ясной цели и privacy review</td>
+                <td><span class="badge risk">needs review</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://amcu.gov.ua/napryami/oskarzhennya-publichnih-zakupivel/zvedeni-vidomosti-shchodo-spotvorennya-rezultativ-torgiv" target="_blank" rel="noreferrer">АМКУ торги</a></td>
+                <td>Сведения о спотворении результатов торгов</td>
+                <td>Официальные файлы/страницы с датой источника</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://data.gov.ua/dataset/0a556891-d6ef-4a5f-a182-caac2f7aa9c9" target="_blank" rel="noreferrer">Реестр судебных экспертов</a></td>
+                <td>Проверка аттестованных судебных экспертов</td>
+                <td>Официальный open-data dataset</td>
+                <td><span class="badge research">safe-open-data</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://asbn.minjust.gov.ua/ak/list" target="_blank" rel="noreferrer">Арбитражные управляющие</a></td>
+                <td>Проверка insolvency professionals</td>
+                <td>Официальный поиск и dataset после проверки полей</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://nais.gov.ua/m/ediniy-reestr-notariusiv-188" target="_blank" rel="noreferrer">Реестр нотариусов</a></td>
+                <td>Проверка нотариуса и нотариального округа</td>
+                <td>Официальный реестр/open-data после terms review</td>
+                <td><span class="badge research">researching</span></td>
+              </tr>
+              <tr>
+                <td><a href="https://e-construction.gov.ua/" target="_blank" rel="noreferrer">Е-система строительства</a></td>
+                <td>Разрешения, участники строительства, лицензии</td>
+                <td>Официальный портал, API/terms уточнить</td>
+                <td><span class="badge research">researching</span></td>
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="disclaimer">
+          <strong>Правило доступа.</strong>
+          Публичность реестра не означает, что его можно массово копировать, хранить или продавать.
+          Для чувствительных источников показываем официальный линк и ручную проверку, пока не подтверждены условия доступа.
         </div>
       </section>
 
@@ -96,7 +193,7 @@
             Контакт для раннего доступа
             <input type="email" placeholder="email@example.com">
           </label>
-          <button class="button primary" type="button">Сохранить интерес</button>
+          <a class="button primary" href="legal-check.html">Открыть макет отчета</a>
         </form>
       </section>
     </main>

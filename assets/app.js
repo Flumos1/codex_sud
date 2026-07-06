@@ -10,14 +10,21 @@
 
   const readCards = () => {
     try {
-      return JSON.parse(localStorage.getItem(storageKey)) || [];
+      const parsed = JSON.parse(localStorage.getItem(storageKey));
+      return Array.isArray(parsed) ? parsed : [];
     } catch (error) {
       return [];
     }
   };
 
   const writeCards = (cards) => {
-    localStorage.setItem(storageKey, JSON.stringify(cards));
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(cards));
+      return true;
+    } catch (error) {
+      window.alert("Не удалось сохранить карточку: локальное хранилище недоступно или переполнено.");
+      return false;
+    }
   };
 
   const formatDate = (value) => {
@@ -83,13 +90,21 @@
     }
 
     const cards = [card, ...readCards()].slice(0, 20);
-    writeCards(cards);
+    if (!writeCards(cards)) {
+      return;
+    }
     form.reset();
     render();
   });
 
   if (clear) {
     clear.addEventListener("click", () => {
+      if (!readCards().length) {
+        return;
+      }
+      if (!window.confirm("Удалить все сохраненные карточки? Это действие нельзя отменить.")) {
+        return;
+      }
       localStorage.removeItem(storageKey);
       render();
     });

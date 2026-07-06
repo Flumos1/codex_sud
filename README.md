@@ -10,6 +10,7 @@ Static pages:
 - `precedent-search.html` - precedent/case-law search prototype with local JSONL loading.
 - `case-status.html` - user-driven case status flow for `court.gov.ua/fair/`.
 - `registries.html` - registry intelligence catalog concept.
+- `legal-check.html` - first report layout for official-source legal checks.
 
 ## Project Memory
 
@@ -134,15 +135,26 @@ node scripts/serve-search-api.mjs --input data/index/edrsr-2026.sample.text.json
 
 Useful endpoints:
 
-- `GET /health`
+- `GET /health` (alias `GET /api/health`)
 - `GET /api/search?article=625%20%D0%A6%D0%9A&limit=10`
 - `GET /api/analyze?article=%D0%9A%D0%90%D0%A1%20%D0%A3%D0%BA%D1%80%D0%B0%D1%97%D0%BD%D0%B8%3A333`
 - `GET /api/decisions/sample-005`
 
 `/api/search` returns compact decision cards by default. Add `include_text=1` only for development or explicit full-text review flows.
 `/api/decisions/:decision_id` returns the full decision text for a single explicit review flow.
+`/api/search` limits `limit` to 100 and returns `400 invalid_limit` for non-positive or non-numeric values.
 
-`precedent-search.html` tries the API at `http://127.0.0.1:8787` first and falls back to local JSONL samples if the API is not running. You can point it to another API base with `precedent-search.html?api=http://127.0.0.1:8787`.
+`precedent-search.html` probes `GET /api/health` on the same origin (and `http://127.0.0.1:8787` in local dev), then falls back to local JSONL samples if no API answers. You can point it to another API base with `precedent-search.html?api=http://127.0.0.1:8787` (only `localhost`/`127.0.0.1` bases are accepted).
+
+## Deploy to Vercel
+
+The same search API runs on Vercel as serverless functions:
+
+- `api/health.mjs`, `api/search.mjs`, `api/analyze.mjs`, `api/decisions/[id].mjs` — thin handlers over the shared `scripts/api-core.mjs` (identical logic to the Node dev server).
+- `api/_data.mjs` loads and caches `data/sample/edrsr-sample.jsonl` (the only dataset shipped to the deployment).
+- `vercel.json` sets security headers plus `functions.includeFiles` so the sample is bundled; `.vercelignore` keeps raw data, indexes, tests and local tooling out of the deployment while shipping `scripts/` (imported by the functions).
+
+Import `Flumos1/codex_sud` in Vercel (Framework Preset: Other, empty build command). The deployed `precedent-search.html` finds the same-origin `/api/*` functions automatically and serves search/analytics over the synthetic sample.
 Search result cards can open a full decision detail dialog through `/api/decisions/:decision_id`, with a local JSONL fallback during static development.
 
 Analyze a normalized or text-enriched JSONL file:

@@ -1,4 +1,4 @@
-import { clean, getArticleKeys, includesText } from "./legal-text-utils.mjs";
+import { clean, excerptAround, getArticleKeys, includesText, unique } from "./legal-text-utils.mjs";
 
 export function filterDecisions(decisions, query = {}) {
   return decisions.filter((decision) => {
@@ -24,6 +24,20 @@ export function summarizeSearchResults(items) {
     by_level: countBy(items, "court_level"),
     by_article: countArticles(items),
   };
+}
+
+export function buildRelevantExcerpts(decision, query = {}, limit = 3) {
+  const text = clean(decision.text);
+  if (!text) return (decision.key_excerpts || []).slice(0, limit);
+
+  const excerpts = [];
+  for (const term of excerptTerms(decision, query)) {
+    const match = findTermMatch(text, term);
+    if (match) excerpts.push(excerptAround(text, match.index, match.length));
+    if (excerpts.length >= limit) break;
+  }
+
+  return unique([...excerpts, ...(decision.key_excerpts || [])]).slice(0, limit);
 }
 
 export function sortResults(items, sortMode = "date_desc") {
@@ -62,6 +76,32 @@ export function matchesList(values, needle) {
 
 function searchableText(decision) {
   return [decision.text, decision.case_number, decision.court_name].join(" ");
+}
+
+function excerptTerms(decision, query) {
+  const terms = [query.q, query.article, query.law];
+  if (query.article) terms.push(...getArticleKeys(decision), ...(decision.cited_articles || []));
+
+  return unique(
+    terms
+      .flatMap((term) => expandTerm(term))
+      .map(clean)
+      .filter((term) => term.length >= 3),
+  );
+}
+
+function expandTerm(term) {
+  const value = clean(term);
+  if (!value) return [];
+  const words = value.split(" ").filter((word) => word.length >= 3);
+  return [value, ...words];
+}
+
+function findTermMatch(text, term) {
+  const normalizedText = text.toLocaleLowerCase("uk-UA");
+  const normalizedTerm = term.toLocaleLowerCase("uk-UA");
+  const index = normalizedText.indexOf(normalizedTerm);
+  return index >= 0 ? { index, length: term.length } : null;
 }
 
 function countBy(items, key) {

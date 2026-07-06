@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev-search-api",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/serve-search-api.mjs", "--static", ".", "--port", "8787"],
+      "port": 8787
+    }
+  ]
+}

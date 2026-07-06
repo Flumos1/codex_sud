@@ -33,11 +33,60 @@ export function summarizePractice(decisions, sourceTotal = decisions.length, que
     top_articles: topCounts(countList(decisions, "cited_articles"), 30),
     top_article_keys: topCounts(countArticleKeys(decisions), 30),
     top_laws: topCounts(countList(decisions, "cited_laws"), 20),
+    outcome_groups: topCounts(countOutcomeGroups(decisions), 10),
+    review_sets: buildReviewSets(decisions),
     outcome_by_year: pivotCounts(decisions, yearOf, (decision) => clean(decision.outcome_label) || "unknown"),
     outcome_by_region: pivotCounts(decisions, (decision) => clean(decision.court_region) || "unknown", (decision) =>
       clean(decision.outcome_label) || "unknown",
     ),
   };
+}
+
+export function outcomeGroup(decision) {
+  const label = clean(decision.outcome_label);
+  const confidence = Number(decision.outcome_confidence || 0);
+  if (!label || label === "unknown" || confidence < 0.65) return "needs_manual_review";
+
+  if (
+    [
+      "satisfied",
+      "partially_satisfied",
+      "appeal_granted",
+      "cassation_granted",
+      "left_unchanged",
+    ].includes(label)
+  ) {
+    return "supporting_outcome";
+  }
+
+  if (
+    [
+      "dismissed",
+      "appeal_dismissed",
+      "cassation_dismissed",
+      "cassation_refused_opening",
+      "motion_denied",
+      "closed",
+    ].includes(label)
+  ) {
+    return "opposing_outcome";
+  }
+
+  if (
+    [
+      "cancelled",
+      "changed",
+      "remanded",
+      "case_scheduled",
+      "cassation_opened",
+      "cassation_returned",
+      "transferred",
+    ].includes(label)
+  ) {
+    return "procedural_turn";
+  }
+
+  return "needs_manual_review";
 }
 
 function countBy(items, key) {
@@ -82,6 +131,58 @@ function countTextStatus(items) {
     acc[value] = (acc[value] || 0) + 1;
     return acc;
   }, {});
+}
+
+function countOutcomeGroups(items) {
+  return items.reduce((acc, item) => {
+    const group = outcomeGroup(item);
+    acc[group] = (acc[group] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+function buildReviewSets(items) {
+  const groups = {
+    supporting_outcome: [],
+    opposing_outcome: [],
+    procedural_turn: [],
+    needs_manual_review: [],
+  };
+
+  for (const item of sortForReview(items)) {
+    const group = outcomeGroup(item);
+    if (groups[group].length >= 5) continue;
+    groups[group].push(compactDecision(item, group));
+  }
+
+  return groups;
+}
+
+function sortForReview(items) {
+  return [...items].sort(
+    (a, b) =>
+      Number(b.outcome_confidence || 0) - Number(a.outcome_confidence || 0) ||
+      clean(b.decision_date).localeCompare(clean(a.decision_date)) ||
+      clean(a.case_number).localeCompare(clean(b.case_number), "uk"),
+  );
+}
+
+function compactDecision(item, group) {
+  return {
+    decision_id: item.decision_id || "",
+    case_number: item.case_number || "",
+    court_name: item.court_name || "",
+    court_region: item.court_region || "",
+    court_level: item.court_level || "",
+    decision_date: item.decision_date || "",
+    decision_type: item.decision_type || "",
+    outcome_label: item.outcome_label || "unknown",
+    outcome_confidence: Number(item.outcome_confidence || 0),
+    outcome_group: group,
+    source_url: item.source_url || "",
+    cited_article_keys: getArticleKeys(item),
+    key_excerpts: (item.key_excerpts || []).slice(0, 2),
+  };
 }
 
 function pivotCounts(items, rowGetter, columnGetter) {

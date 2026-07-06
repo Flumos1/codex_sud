@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import { parseArgs, readJsonl } from "./cli-utils.mjs";
 import { getArticleKeys } from "./legal-text-utils.mjs";
 import { filterDecisions, limitResults, sortResults, summarizeSearchResults } from "./search-utils.mjs";
 
@@ -15,7 +15,7 @@ delete args.input;
 delete args.json;
 delete args.csv;
 
-const decisions = await loadJsonl(inputPath);
+const decisions = await readJsonl(inputPath);
 const matchedResults = filterDecisions(decisions, args);
 const sortedResults = sortResults(matchedResults, args.sort);
 const results = limitResults(sortedResults, args.limit);
@@ -28,32 +28,6 @@ if (outputCsv) {
   process.stdout.write(JSON.stringify(output, null, 2));
 } else {
   printHuman(args, summary, results);
-}
-
-async function loadJsonl(file) {
-  const text = await readFile(file, "utf8");
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
-}
-
-function parseArgs(raw) {
-  const parsed = {};
-  for (let index = 0; index < raw.length; index += 1) {
-    const token = raw[index];
-    if (!token.startsWith("--")) continue;
-    const key = token.slice(2);
-    const next = raw[index + 1];
-    if (!next || next.startsWith("--")) {
-      parsed[key] = true;
-    } else {
-      parsed[key] = next;
-      index += 1;
-    }
-  }
-  return parsed;
 }
 
 function printHuman(query, summary, results) {
