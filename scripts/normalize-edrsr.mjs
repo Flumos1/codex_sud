@@ -1,6 +1,7 @@
 import { createReadStream } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { parseArgs } from "./cli-utils.mjs";
 import { classifyOutcome, clean, extractArticles, unique } from "./legal-text-utils.mjs";
 
 const args = parseArgs(process.argv.slice(2));
@@ -244,23 +245,6 @@ function inferDatasetName(inputDir) {
   const baseName = path.basename(inputDir).toLocaleLowerCase("uk-UA");
   const year = baseName.match(/20\d{2}/)?.[0] || "unknown";
   return `edrsr_data_${year}`;
-}
-
-function parseArgs(raw) {
-  const parsed = {};
-  for (let index = 0; index < raw.length; index += 1) {
-    const token = raw[index];
-    if (!token.startsWith("--")) continue;
-    const key = token.slice(2);
-    const next = raw[index + 1];
-    if (!next || next.startsWith("--")) {
-      parsed[key] = true;
-    } else {
-      parsed[key] = next;
-      index += 1;
-    }
-  }
-  return parsed;
 }
 
 function printUsage() {

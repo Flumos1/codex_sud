@@ -1,7 +1,8 @@
 (function () {
   const localRealSample = "data/index/edrsr-2026.first20.text.jsonl";
   const fallbackSample = "data/sample/edrsr-sample.jsonl";
-  const apiParam = new URLSearchParams(window.location.search).get("api");
+  const HEALTH_TIMEOUT_MS = 1500;
+  const apiParam = sanitizeApiBase(new URLSearchParams(window.location.search).get("api"));
   const form = document.querySelector("#precedentForm");
   const metrics = document.querySelector("#practiceMetrics");
   const facets = document.querySelector("#practiceFacets");
@@ -15,6 +16,9 @@
   let decisions = [];
   let activeSource = "";
   let apiBase = "";
+  let inFlightController = null;
+  const submitButton =
+    typeof form?.querySelector === "function" ? form.querySelector('button[type="submit"]') : null;
 
   if (!form || !metrics || !facets || !results || !reviewSets) return;
 
@@ -22,16 +26,28 @@
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    if (apiBase) {
-      await renderFromApi(new FormData(form));
+    if (!apiBase) {
+      renderLocal(filterDecisions(decisions, new FormData(form)));
       return;
     }
-    renderLocal(filterDecisions(decisions, new FormData(form)));
+
+    setLoading(true);
+    try {
+      await renderFromApi(new FormData(form));
+    } catch (error) {
+      if (error.name === "AbortError") return;
+      showSearchError(error);
+    } finally {
+      setLoading(false);
+    }
   });
+
+  let lastFocusedTrigger = null;
 
   results.addEventListener("click", async (event) => {
     const button = event.target.closest("[data-open-decision]");
     if (!button) return;
+    lastFocusedTrigger = button;
     await openDecision(button.dataset.openDecision);
   });
 
@@ -39,13 +55,31 @@
     decisionDialog?.close();
   });
 
+  // Close the modal when clicking the backdrop (clicks on the dialog element itself, outside its content).
+  decisionDialog?.addEventListener("click", (event) => {
+    if (event.target === decisionDialog) decisionDialog.close();
+  });
+
+  // Restore focus to the trigger button after the dialog closes (keyboard accessibility).
+  decisionDialog?.addEventListener("close", () => {
+    if (lastFocusedTrigger && typeof lastFocusedTrigger.focus === "function") {
+      lastFocusedTrigger.focus();
+      lastFocusedTrigger = null;
+    }
+  });
+
   async function initialize() {
     apiBase = await detectApiBase();
     if (apiBase) {
       activeSource = apiBase;
       sourceNote.textContent = `Подключен локальный Search API: ${apiBase}.`;
-      await renderFromApi(new FormData(form));
-      return;
+      try {
+        await renderFromApi(new FormData(form));
+        return;
+      } catch (error) {
+        apiBase = "";
+        sourceNote.textContent = "Search API недоступен, переключаемся на локальный sample.";
+      }
     }
 
     const loaded = await loadData();
@@ -59,16 +93,24 @@
   }
 
   async function detectApiBase() {
+    const onHttps = window.location.protocol === "https:";
     const candidates = [
       apiParam,
       `${window.location.protocol}//${window.location.hostname || "127.0.0.1"}:8787`,
       "http://127.0.0.1:8787",
-    ].filter(Boolean);
+    ]
+      .filter(Boolean)
+      .map((candidate) => candidate.replace(/\/$/u, ""))
+      // On an https page an http://127.0.0.1 request is blocked as mixed content; skip it.
+      .filter((candidate) => !(onHttps && candidate.startsWith("http://")));
 
     for (const candidate of [...new Set(candidates)]) {
       try {
-        const response = await fetch(`${candidate.replace(/\/$/u, "")}/health`, { cache: "no-store" });
-        if (response.ok) return candidate.replace(/\/$/u, "");
+        const response = await fetch(`${candidate}/health`, {
+          cache: "no-store",
+          signal: timeoutSignal(HEALTH_TIMEOUT_MS),
+        });
+        if (response.ok) return candidate;
       } catch (error) {
         // Local fallback is expected when the API server is not running.
       }
@@ -77,11 +119,15 @@
   }
 
   async function renderFromApi(data) {
+    inFlightController?.abort();
+    inFlightController = typeof AbortController === "function" ? new AbortController() : null;
+    const signal = inFlightController?.signal;
+
     const filters = queryFromFormData(data);
     const searchQuery = { ...filters, sort: "date_desc", limit: "20" };
     const [searchPayload, analysisPayload] = await Promise.all([
-      fetchJson(`${apiBase}/api/search?${toQueryString(searchQuery)}`),
-      fetchJson(`${apiBase}/api/analyze?${toQueryString(filters)}`),
+      fetchJson(`${apiBase}/api/search?${toQueryString(searchQuery)}`, signal),
+      fetchJson(`${apiBase}/api/analyze?${toQueryString(filters)}`, signal),
     ]);
 
     renderMetricsFromAnalysis(analysisPayload);
@@ -90,10 +136,33 @@
     renderResults((searchPayload.results || []).map(normalizeDecision));
   }
 
-  async function fetchJson(url) {
-    const response = await fetch(url, { cache: "no-store" });
+  async function fetchJson(url, signal) {
+    const response = await fetch(url, { cache: "no-store", signal });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();
+  }
+
+  function setLoading(isLoading) {
+    if (!submitButton) return;
+    submitButton.disabled = isLoading;
+    submitButton.setAttribute("aria-busy", String(isLoading));
+  }
+
+  function showSearchError(error) {
+    const message = error?.message ? `Ошибка запроса: ${escapeHtml(error.message)}.` : "Не удалось получить данные.";
+    results.innerHTML = `<p class="empty-state">${message} Проверьте, запущен ли Search API, и повторите поиск.</p>`;
+  }
+
+  function timeoutSignal(ms) {
+    if (typeof AbortSignal !== "undefined" && typeof AbortSignal.timeout === "function") {
+      return AbortSignal.timeout(ms);
+    }
+    if (typeof AbortController === "function" && typeof setTimeout === "function") {
+      const controller = new AbortController();
+      setTimeout(() => controller.abort(), ms);
+      return controller.signal;
+    }
+    return undefined;
   }
 
   async function loadData() {
@@ -181,9 +250,9 @@
 
   function renderMetricsFromAnalysis(summary) {
     metrics.innerHTML = `
-      <div><strong>${summary.total || 0}</strong><span>найденных решений</span></div>
-      <div><strong>${summary.text_coverage?.count || 0}</strong><span>с текстом решения</span></div>
-      <div><strong>${summary.outcome_coverage?.count || 0}</strong><span>с определенным исходом</span></div>
+      <div><strong>${safeCount(summary.total)}</strong><span>найденных решений</span></div>
+      <div><strong>${safeCount(summary.text_coverage?.count)}</strong><span>с текстом решения</span></div>
+      <div><strong>${safeCount(summary.outcome_coverage?.count)}</strong><span>с определенным исходом</span></div>
     `;
   }
 
@@ -207,11 +276,13 @@
   }
 
   function renderFacetGroup(title, rows) {
-    if (!rows.length) return `<div class="facet-group"><h3>${title}</h3><p class="empty-state">нет данных</p></div>`;
+    if (!rows.length) return `<div class="facet-group"><h3>${escapeHtml(title)}</h3><p class="empty-state">нет данных</p></div>`;
     return `
       <div class="facet-group">
-        <h3>${title}</h3>
-        ${rows.map((row) => `<div class="facet-row"><span>${escapeHtml(row.value)}</span><strong>${row.count}</strong></div>`).join("")}
+        <h3>${escapeHtml(title)}</h3>
+        ${rows
+          .map((row) => `<div class="facet-row"><span>${escapeHtml(row.value)}</span><strong>${safeCount(row.count)}</strong></div>`)
+          .join("")}
       </div>
     `;
   }
@@ -226,8 +297,9 @@
       .map((item) => {
         const articles = [...(item.cited_article_keys || []), ...(item.cited_articles || [])].slice(0, 6);
         const excerpt = item.key_excerpts?.[0] || firstTextExcerpt(item.text);
-        const source = item.source_url
-          ? `<a href="${escapeAttribute(item.source_url)}" target="_blank" rel="noreferrer">Официальный текст</a>`
+        const sourceUrl = safeHttpUrl(item.source_url);
+        const source = sourceUrl
+          ? `<a href="${escapeAttribute(sourceUrl)}" target="_blank" rel="noreferrer">Официальный текст</a>`
           : '<span>Текст недоступен</span>';
         const detailButton = item.decision_id
           ? `<button class="link-button" type="button" data-open-decision="${escapeAttribute(item.decision_id)}">Открыть решение</button>`
@@ -371,8 +443,9 @@
   function renderDecisionDetail(decision) {
     const title = decision.case_number || decision.decision_id || "Решение";
     const articles = [...(decision.cited_article_keys || []), ...(decision.cited_articles || [])].slice(0, 10);
-    const source = decision.source_url
-      ? `<a href="${escapeAttribute(decision.source_url)}" target="_blank" rel="noreferrer">Открыть официальный источник</a>`
+    const sourceUrl = safeHttpUrl(decision.source_url);
+    const source = sourceUrl
+      ? `<a href="${escapeAttribute(sourceUrl)}" target="_blank" rel="noreferrer">Открыть официальный источник</a>`
       : '<span>Официальная ссылка отсутствует</span>';
 
     decisionDialogTitle.textContent = title;
@@ -502,5 +575,32 @@
 
   function escapeAttribute(value) {
     return escapeHtml(value).replaceAll("`", "&#096;");
+  }
+
+  function safeCount(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
+  }
+
+  function safeHttpUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return url.protocol === "http:" || url.protocol === "https:" ? url.href : "";
+    } catch (error) {
+      return "";
+    }
+  }
+
+  function sanitizeApiBase(value) {
+    if (!value) return "";
+    try {
+      const url = new URL(value);
+      const isLocalHost = url.hostname === "127.0.0.1" || url.hostname === "localhost" || url.hostname === "[::1]";
+      if (!isLocalHost) return "";
+      if (url.protocol !== "http:" && url.protocol !== "https:") return "";
+      return `${url.protocol}//${url.host}`;
+    } catch (error) {
+      return "";
+    }
   }
 })();

@@ -17,6 +17,11 @@ test("precedent search UI uses the local API when available", async () => {
     const context = {
       FormData: MockFormData,
       URLSearchParams,
+      URL,
+      AbortController,
+      AbortSignal,
+      setTimeout,
+      clearTimeout,
       console,
       document: {
         querySelector(selector) {
@@ -93,7 +98,8 @@ function createElement() {
 }
 
 function createDialogElement() {
-  return {
+  const element = createElement();
+  return Object.assign(element, {
     open: false,
     close() {
       this.open = false;
@@ -101,7 +107,7 @@ function createDialogElement() {
     showModal() {
       this.open = true;
     },
-  };
+  });
 }
 
 class MockFormData {

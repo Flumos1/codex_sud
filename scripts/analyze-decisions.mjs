@@ -1,6 +1,6 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { summarizePractice } from "./analytics-utils.mjs";
+import { parseArgs, readJsonl } from "./cli-utils.mjs";
 import { filterDecisions } from "./search-utils.mjs";
 
 const args = parseArgs(process.argv.slice(2));
@@ -13,7 +13,7 @@ if (!args.input) {
   const outputJson = Boolean(args.json);
   delete args.input;
   delete args.json;
-  const decisions = await loadJsonl(inputPath);
+  const decisions = await readJsonl(inputPath);
   const filtered = filterDecisions(decisions, args);
   const summary = summarizePractice(filtered, decisions.length, args);
 
@@ -22,15 +22,6 @@ if (!args.input) {
   } else {
     printHuman(summary);
   }
-}
-
-async function loadJsonl(filePath) {
-  const text = await readFile(filePath, "utf8");
-  return text
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => JSON.parse(line));
 }
 
 function printHuman(summary) {
@@ -100,23 +91,6 @@ function printReviewSets(reviewSets) {
       console.log(`  - ${title || row.decision_id || "unknown decision"}`);
     }
   }
-}
-
-function parseArgs(raw) {
-  const parsed = {};
-  for (let index = 0; index < raw.length; index += 1) {
-    const token = raw[index];
-    if (!token.startsWith("--")) continue;
-    const key = token.slice(2);
-    const next = raw[index + 1];
-    if (!next || next.startsWith("--")) {
-      parsed[key] = true;
-    } else {
-      parsed[key] = next;
-      index += 1;
-    }
-  }
-  return parsed;
 }
 
 function printUsage() {

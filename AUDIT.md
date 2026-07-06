@@ -239,31 +239,33 @@
 
 ## Приоритетный план исправлений (чеклист)
 
+> **Статус на 2026-07-06 (ветка `audit-fixes`):** выполнены все пункты P0 и P1, большая часть P2 и мелкие пункты P3. Тесты: 28/28. Осталось: ARCH-1 (единый клиент/сервер модуль), serverless-API для Vercel, UX-2 (язык интерфейса), PERF-1 (компактный индекс) — они помечены ниже как «отложено».
+
 **P0 — до любого публичного деплоя с API:**
-- [ ] SEC-1: валидация `?api=` + экранирование числовых полей (XSS).
-- [ ] SEC-2: проверка схемы `source_url` (только http/https).
-- [ ] SEC-4: жесткий `MAX_LIMIT` на API + отказ на невалидный limit.
-- [ ] SEC-3: dev-сервер — запрет `.git/`, `data/raw/`, dot-файлов, whitelist расширений.
+- [x] SEC-1: валидация `?api=` (только localhost) + приведение числовых полей к `Number` (`safeCount`).
+- [x] SEC-2: проверка схемы `source_url` (`safeHttpUrl`, только http/https).
+- [x] SEC-4: `MAX_LIMIT=100` + `resolveLimit` возвращает 400 на невалидный limit; whitelist параметров запроса.
+- [x] SEC-3: dev-сервер запрещает dot-файлы (`.git`, `.env`), `data/raw/`, ограничивает whitelist расширений.
 
 **P1 — стабильность UX:**
-- [ ] BUG-1: try/catch + сообщение об ошибке + loading-состояние на сабмите поиска.
-- [ ] BUG-2: AbortController против гонки запросов.
-- [ ] BUG-3: `Array.isArray` в `readCards()`.
-- [ ] BUG-8: таймауты в `detectApiBase`, пропуск http-кандидатов на https.
-- [ ] UX-3: подтверждение перед «Очистить».
+- [x] BUG-1: try/catch + `showSearchError` + `setLoading` (disabled/aria-busy) на сабмите поиска.
+- [x] BUG-2: `AbortController` — отмена предыдущего запроса.
+- [x] BUG-3: `Array.isArray` в `readCards()`; BUG-4: try/catch в `writeCards()`.
+- [x] BUG-8: `AbortSignal.timeout(1500)` в `detectApiBase`, пропуск http-кандидатов на https.
+- [x] UX-3: `window.confirm` перед «Очистить».
 
 **P2 — архитектура и качество:**
-- [ ] ARCH-1: единый общий модуль доменной логики для клиента и сервера (устранит и BUG-7).
-- [ ] ARCH-2: общий `cli-utils.mjs` (`parseArgs`, `loadJsonl`).
-- [ ] SEC-5/SEC-6/SEC-7: CORS whitelist, скрытие error.message, security-заголовки в dev-сервере.
-- [ ] DATA-1: устойчивое чтение JSONL (пропуск битых строк).
-- [ ] BUG-5/BUG-6: правки регулярок classifyOutcome + тесты на составные резолютивы.
-- [ ] DEV-1: `engines` в package.json; DEV-3: GitHub Actions CI.
+- [ ] ARCH-1: единый общий модуль доменной логики для клиента и сервера (устранит и BUG-7). **Отложено** — крупный рефакторинг, делать отдельно.
+- [x] ARCH-2: общий `scripts/cli-utils.mjs` (`parseArgs`, `readJsonl`) вместо 5 копий.
+- [x] SEC-5/SEC-6/SEC-7: CORS whitelist (env `SEARCH_API_ALLOWED_ORIGINS`), скрытие `error.message`, security-заголовки в dev-сервере.
+- [x] DATA-1: `readJsonl` пропускает битые строки с предупреждением.
+- [x] BUG-5/BUG-6: регулярка `remanded` по падежам + приоритет над `transferred`; тесты добавлены.
+- [x] DEV-1: `engines: node>=20` в package.json; DEV-3: GitHub Actions CI (`.github/workflows/ci.yml`).
 
 **P3 — продуктовые улучшения:**
-- [ ] Serverless-функции API для Vercel (search/analyze/decisions).
-- [ ] UX-1: фокус-менеджмент диалога, закрытие по backdrop.
-- [ ] UX-2: определиться с языком интерфейса (uk vs ru) и выставить корректный `lang`.
-- [ ] UX-5: Roadmap-ссылку убрать из навигации или конвертировать в HTML.
-- [ ] PERF-1: компактный индекс без текстов для статического fallback.
-- [ ] BUG-11: Map-индекс для `/api/decisions/:id`.
+- [ ] Serverless-функции API для Vercel (search/analyze/decisions). **Отложено.**
+- [x] UX-1: фокус-менеджмент диалога (возврат фокуса на триггер) + закрытие по клику на backdrop.
+- [ ] UX-2: определиться с языком интерфейса (uk vs ru) и выставить корректный `lang`. **Отложено** (продуктовое решение).
+- [x] UX-5: ссылка Roadmap убрана из пользовательской навигации на всех страницах.
+- [ ] PERF-1: компактный индекс без текстов для статического fallback. **Отложено.**
+- [x] BUG-11: `Map<decision_id, decision>` для `/api/decisions/:id`.

@@ -81,6 +81,46 @@ test("search API returns filtered practice analytics", async () => {
   });
 });
 
+test("search API rejects invalid limit values", async () => {
+  await withServer(async (baseUrl) => {
+    for (const badLimit of ["0", "-3", "abc"]) {
+      const response = await fetch(`${baseUrl}/api/search?limit=${badLimit}`);
+      const payload = await response.json();
+      assert.equal(response.status, 400);
+      assert.equal(payload.error, "invalid_limit");
+    }
+  });
+});
+
+test("search API caps limit at the maximum instead of dumping everything", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/search?limit=100000`);
+    // Sample has 5 decisions; an over-max limit must be accepted (not 400) and simply return what exists.
+    assert.equal(payload.results.length, 5);
+  });
+});
+
+test("search API ignores unknown query parameters", async () => {
+  await withServer(async (baseUrl) => {
+    const payload = await getJson(`${baseUrl}/api/search?evil=%3Cscript%3E&limit=5`);
+    assert.equal("evil" in payload.query, false);
+  });
+});
+
+test("static dev mode blocks dot-files, raw data and disallowed extensions", async () => {
+  await withServer(
+    async (baseUrl) => {
+      for (const blockedPath of ["/.gitignore", "/data/raw/edrsr_2026/documents.csv", "/package.json.bak"]) {
+        const response = await fetch(`${baseUrl}${blockedPath}`);
+        assert.equal(response.status === 403 || response.status === 404, true, `expected block for ${blockedPath}`);
+      }
+      const gitConfig = await fetch(`${baseUrl}/.git/config`);
+      assert.equal(gitConfig.status, 403);
+    },
+    { staticRoot: process.cwd() },
+  );
+});
+
 test("search API can serve static prototype files in dev mode", async () => {
   await withServer(async (baseUrl) => {
     const html = await getText(`${baseUrl}/precedent-search.html`);

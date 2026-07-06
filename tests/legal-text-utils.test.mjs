@@ -48,6 +48,20 @@ test("classifyOutcome detects procedural cassation outcomes", () => {
   assert.equal(classifyOutcome(returned).label, "cassation_returned");
 });
 
+test("classifyOutcome detects remand across grammatical cases", () => {
+  const nominative = [
+    "Суд скасував рішення суду першої інстанції.",
+    "ПОСТАНОВИВ: справу направити на новий розгляд.",
+  ].join(" ");
+  const genitive = [
+    "Апеляційний суд встановив порушення норм процесуального права.",
+    "ПОСТАНОВИВ: передати справу для нового розгляду до суду першої інстанції.",
+  ].join(" ");
+
+  assert.equal(classifyOutcome(nominative).label, "remanded");
+  assert.equal(classifyOutcome(genitive).label, "remanded");
+});
+
 test("article key helpers keep search filters stable", () => {
   assert.equal(normalizeLawName("Кодексу адміністративного судочинства України"), "КАС України");
   assert.equal(normalizeLawName("130 КУпАП"), "КУпАП");
