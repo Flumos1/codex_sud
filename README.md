@@ -25,6 +25,17 @@ Static pages:
 
 The repository contains a synthetic sample dataset only. It is not real court data.
 
+## Production Deployment
+
+The production target is Cloudflare Pages + Supabase:
+
+- Cloudflare Pages serves the static UI.
+- Cloudflare Pages Functions expose same-origin `/health` and `/api/*` routes.
+- Those Pages Functions proxy to a Supabase Edge Function.
+- Supabase Postgres stores indexed legal decisions in `public.legal_decisions`.
+
+See `docs/cloudflare-supabase-deploy.md` for setup, environment variables, and deployment steps.
+
 Run syntax checks and regression tests:
 
 ```bash

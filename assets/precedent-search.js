@@ -42,7 +42,7 @@
     apiBase = await detectApiBase();
     if (apiBase) {
       activeSource = apiBase;
-      sourceNote.textContent = `Подключен локальный Search API: ${apiBase}.`;
+      sourceNote.textContent = `Подключен Search API: ${apiBase}.`;
       await renderFromApi(new FormData(form));
       return;
     }
@@ -58,8 +58,11 @@
   }
 
   async function detectApiBase() {
+    const sameOrigin =
+      window.location.protocol === "http:" || window.location.protocol === "https:" ? window.location.origin : "";
     const candidates = [
       apiParam,
+      sameOrigin,
       `${window.location.protocol}//${window.location.hostname || "127.0.0.1"}:8787`,
       "http://127.0.0.1:8787",
     ].filter(Boolean);
