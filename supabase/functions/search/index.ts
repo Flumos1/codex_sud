@@ -98,10 +98,11 @@ async function countDecisions() {
 }
 
 function routePath(pathname: string) {
-  const parts = pathname.split("/").filter(Boolean);
-  const index = parts.lastIndexOf("search");
-  const route = index >= 0 ? parts.slice(index + 1) : parts;
-  return `/${route.join("/")}`.replace(/\/$/u, "") || "/health";
+  for (const prefix of ["/functions/v1/search", "/search"]) {
+    if (pathname === prefix) return "/health";
+    if (pathname.startsWith(`${prefix}/`)) return pathname.slice(prefix.length).replace(/\/$/u, "") || "/health";
+  }
+  return pathname.replace(/\/$/u, "") || "/health";
 }
 
 function queryFromSearchParams(params: URLSearchParams) {

@@ -12,6 +12,7 @@ readme_2026_extracted.txt
 .dev.vars
 .dev.vars.*
 .wrangler/
+supabase/.temp/
 
 # Dependencies and build outputs
 node_modules/
