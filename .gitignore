@@ -9,6 +9,9 @@ readme_2026_extracted.txt
 # Local environment
 .env
 .env.*
+.dev.vars
+.dev.vars.*
+.wrangler/
 
 # Dependencies and build outputs
 node_modules/
