@@ -33,8 +33,8 @@ supabase secrets set SUPABASE_SERVICE_ROLE_KEY="YOUR_SERVICE_ROLE_KEY"
 Build settings:
 
 - Framework preset: `None`
-- Build command: leave empty
-- Build output directory: `/`
+- Build command: `npm run build:pages`
+- Build output directory: `dist`
 
 Environment variables:
 
@@ -42,6 +42,14 @@ Environment variables:
 - `SUPABASE_ANON_KEY`: public anon key
 
 Cloudflare Pages Functions use the anon key only to call the Edge Function. Database reads still happen inside Supabase with the service role key.
+
+The project also includes `wrangler.toml` and these local helpers:
+
+```bash
+npm run build:pages
+npm run dev:pages
+npm run deploy:pages
+```
 
 ## Import JSONL data
 

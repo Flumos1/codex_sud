@@ -34,7 +34,7 @@ The production target is Cloudflare Pages + Supabase:
 - Those Pages Functions proxy to a Supabase Edge Function.
 - Supabase Postgres stores indexed legal decisions in `public.legal_decisions`.
 
-See `docs/cloudflare-supabase-deploy.md` for setup, environment variables, and deployment steps.
+See `docs/architecture-cloudflare-supabase.md` for the component map and `docs/cloudflare-supabase-deploy.md` for setup, environment variables, and deployment steps.
 
 Run syntax checks and regression tests:
 
