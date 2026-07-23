@@ -18,3 +18,7 @@ supabase/.temp/
 node_modules/
 dist/
 build/
+
+# Local portable tooling (bundled Node.js), never commit
+Claude_sud/
+
